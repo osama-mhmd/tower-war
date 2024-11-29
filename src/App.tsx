@@ -6,8 +6,12 @@ import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./config/constants";
 import getWaypoints from "./utils/get-waypoints";
 
 function App() {
-  const [userHealthPoints, setUserHealthPoints] = useState(10);
-  const [gameOver, setGameOver] = useState(false);
+  const [game, setGame] = useState({
+    enemiesCount: 0,
+    over: false,
+    hp: 18,
+    currentWave: 1,
+  });
 
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -28,13 +32,42 @@ function App() {
       [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
     ];
+
+    const entry = {
+      x: 8,
+      y: -1,
+    };
 
     const waypoints = getWaypoints(grid);
 
-    let enemies: Enemy[] = [new Enemy(ctx, 8, 0, 0.2, 5, waypoints)];
+    let enemies: Enemy[] = [];
 
     function gameLoop(ctx: any) {
+      // spawn enemies
+      const randomX = Math.floor(Math.random() * 100);
+      switch (game.currentWave) {
+        case 1:
+          if (randomX < 1) {
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.02, 5, waypoints));
+            setGame((prev) => ({
+              ...prev,
+              enemiesCount: prev.enemiesCount + 1,
+            }));
+          }
+          break;
+        case 2:
+          if (randomX < 3) {
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.04, 5, waypoints));
+            setGame((prev) => ({
+              ...prev,
+              enemiesCount: prev.enemiesCount + 1,
+            }));
+          }
+          break;
+      }
+
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       drawGrid(ctx, grid);
@@ -44,7 +77,7 @@ function App() {
         enemy.draw();
 
         if (enemy.destroied) {
-          setUserHealthPoints(userHealthPoints - enemy.health);
+          setGame((prev) => ({ ...prev, hp: prev.hp - enemy.health }));
           enemies.splice(index, 1);
         }
       });
@@ -56,14 +89,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (userHealthPoints <= 0) setGameOver(true);
-  }, [userHealthPoints]);
+    if (game.hp <= 0) setGame({ ...game, over: true });
+  }, [game.hp]);
 
   return (
     <main>
-      {userHealthPoints}
+      {game.hp}
       <canvas ref={canvas} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}></canvas>
-      {gameOver && <p>Game Over</p>}
+      {game.over && <p>Game Over</p>}
     </main>
   );
 }
