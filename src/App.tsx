@@ -4,6 +4,7 @@ import drawGrid from "./utils/draw-grid";
 import Enemy from "./objects/enemy";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./config/constants";
 import getWaypoints from "./utils/get-waypoints";
+import { Heart, Skull } from "lucide-react";
 
 function App() {
   const [game, setGame] = useState({
@@ -85,7 +86,9 @@ function App() {
       requestAnimationFrame(() => gameLoop(ctx));
     }
 
-    gameLoop(ctx);
+    const frameId = requestAnimationFrame(() => gameLoop(ctx));
+
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
   useEffect(() => {
@@ -94,9 +97,28 @@ function App() {
 
   return (
     <main>
-      {game.hp}
-      <canvas ref={canvas} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}></canvas>
-      {game.over && <p>Game Over</p>}
+      <div className="logo">
+        <img src="/public/tower-defense-logo.png" width={80} />
+      </div>
+      <p className="user-hp">
+        {game.hp} <Heart fill="red" stroke="#d30" />
+      </p>
+      <p className="enemies-count">
+        {game.enemiesCount} <Skull fill="#000" stroke="#FF4500" />
+      </p>
+      <section>
+        <canvas
+          ref={canvas}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+        ></canvas>
+      </section>
+      {game.over && (
+        <div className="overlay">
+          <p>Game over</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      )}
     </main>
   );
 }
