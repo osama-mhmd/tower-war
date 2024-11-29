@@ -8,8 +8,8 @@ export default function drawGrid(
     for (let col = 0; col < COLUMNS_COUNT; col++) {
       ctx.fillStyle = grid[row][col] === 1 ? "#aaa" : "#ccc";
       ctx.fillRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-      ctx.strokeStyle = "#000";
-      ctx.strokeRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      // ctx.strokeStyle = "#000";
+      // ctx.strokeRect(col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
     }
   }
 }

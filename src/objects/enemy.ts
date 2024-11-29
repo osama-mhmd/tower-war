@@ -9,6 +9,7 @@ export default class Enemy {
   health: number;
   currentWaypointIndex: number;
   waypoints: Point[];
+  destroied: boolean;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -25,10 +26,14 @@ export default class Enemy {
     this.health = health;
     this.currentWaypointIndex = 0;
     this.waypoints = waypoints;
+    this.destroied = false;
   }
 
   update() {
-    if (this.currentWaypointIndex >= this.waypoints.length) return; // Reached the end
+    if (this.currentWaypointIndex >= this.waypoints.length) {
+      this.destroied = true;
+      return;
+    } // Reached the end
 
     const waypoint = this.waypoints[this.currentWaypointIndex];
     const dx = waypoint.x - this.x;
