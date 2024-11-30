@@ -5,6 +5,7 @@ import Enemy from "./objects/enemy";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./config/constants";
 import getWaypoints from "./utils/get-waypoints";
 import { Heart, Skull } from "lucide-react";
+import Tower from "./objects/tower";
 
 function App() {
   const [game, setGame] = useState({
@@ -44,6 +45,7 @@ function App() {
     const waypoints = getWaypoints(grid);
 
     let enemies: Enemy[] = [];
+    const tower = new Tower(ctx, 2, 3);
 
     function gameLoop(ctx: any) {
       // spawn enemies
@@ -73,12 +75,16 @@ function App() {
 
       drawGrid(ctx, grid);
 
+      tower.shoot(enemies);
+      tower.draw();
+
       enemies.forEach((enemy, index) => {
         enemy.update();
         enemy.draw();
 
         if (enemy.destroied) {
-          setGame((prev) => ({ ...prev, hp: prev.hp - enemy.health }));
+          if (enemy.health >= 0)
+            setGame((prev) => ({ ...prev, hp: prev.hp - enemy.health }));
           enemies.splice(index, 1);
         }
       });

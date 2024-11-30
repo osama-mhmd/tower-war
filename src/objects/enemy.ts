@@ -30,7 +30,10 @@ export default class Enemy {
   }
 
   update() {
-    if (this.currentWaypointIndex >= this.waypoints.length) {
+    if (
+      this.currentWaypointIndex >= this.waypoints.length ||
+      this.health <= 0
+    ) {
       this.destroied = true;
       return;
     } // Reached the end
