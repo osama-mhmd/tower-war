@@ -28,6 +28,31 @@ section {
   padding: 1rem;
   top: 1rem;
   left: 1rem;
+  cursor: pointer;
+}
+.logo img {
+  transition: transform 0.2s ease-in-out;
+  position: relative;
+}
+.logo::after {
+  content: "Pause";
+  position: absolute;
+  bottom: -2rem;
+  left: 50%;
+  translate: -50% -1rem;
+  padding: 0.5rem 1rem;
+  background-color: #333;
+  text-align: center;
+  border-radius: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, translate 0.2s ease-in-out;
+}
+.logo:hover::after {
+  opacity: 1;
+  translate: -50% -0.5rem;
+}
+.logo:hover img {
+  transform: scale(1.1);
 }
 .enemies-count,
 .user-hp {

@@ -27,9 +27,8 @@ export default class Tower {
     this.lastShot = 0;
   }
 
-  shoot(enemies: Enemy[]) {
-    const now = performance.now();
-    if (now - this.lastShot > 1000 / this.attackSpeed) {
+  shoot(enemies: Enemy[], gameTime: number) {
+    if (gameTime - this.lastShot > 60 / this.attackSpeed) {
       const target = enemies.find((e) => {
         const dx = e.x - this.x;
         const dy = e.y - this.y;
@@ -38,7 +37,7 @@ export default class Tower {
 
       if (target) {
         target.health -= this.damage;
-        this.lastShot = now;
+        this.lastShot = gameTime;
       }
     }
   }

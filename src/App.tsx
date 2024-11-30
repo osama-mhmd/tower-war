@@ -2,10 +2,43 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import drawGrid from "./utils/draw-grid";
 import Enemy from "./objects/enemy";
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./config/constants";
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  COLUMNS_COUNT,
+  ROWS_COUNT,
+  TILE_SIZE,
+} from "./config/constants";
 import getWaypoints from "./utils/get-waypoints";
 import { Heart, Skull } from "lucide-react";
 import Tower from "./objects/tower";
+import { Point } from "./types/global";
+
+let frameId: number;
+
+const grid = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+  [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+];
+
+const entry = {
+  x: 8,
+  y: -1,
+};
+
+const waypoints = getWaypoints(grid);
+
+let enemies: Enemy[] = [];
+let towers: Tower[] = [];
 
 function App() {
   const [game, setGame] = useState({
@@ -13,9 +46,12 @@ function App() {
     over: false,
     hp: 18,
     currentWave: 1,
+    paused: false,
   });
+  const hoveredCell = useRef<Point | null>(null);
 
   const canvas = useRef<HTMLCanvasElement>(null);
+  const gameTime = useRef<number>(0);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -23,31 +59,12 @@ function App() {
     const ctx = canvas.current.getContext("2d");
     if (!ctx) return;
 
-    const grid = [
-      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    ];
-
-    const entry = {
-      x: 8,
-      y: -1,
-    };
-
-    const waypoints = getWaypoints(grid);
-
-    let enemies: Enemy[] = [];
-    const tower = new Tower(ctx, 2, 3);
-
     function gameLoop(ctx: any) {
+      if (game.paused) return;
+
+      // update time
+      gameTime.current++;
+
       // spawn enemies
       const randomX = Math.floor(Math.random() * 100);
       switch (game.currentWave) {
@@ -73,37 +90,81 @@ function App() {
 
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      drawGrid(ctx, grid);
+      drawGrid(ctx, grid, hoveredCell.current);
 
-      tower.shoot(enemies);
-      tower.draw();
+      towers.forEach((tower) => tower.shoot(enemies, gameTime.current));
+      towers.forEach((tower) => tower.draw());
 
       enemies.forEach((enemy, index) => {
         enemy.update();
         enemy.draw();
 
         if (enemy.destroied) {
-          if (enemy.health >= 0)
-            setGame((prev) => ({ ...prev, hp: prev.hp - enemy.health }));
+          if (enemy.health >= 0) {
+            setGame((prev) => {
+              if (prev.hp - enemy.health <= 0) {
+                return { ...prev, over: true, paused: true, hp: 0 };
+              }
+              return { ...prev, hp: prev.hp - enemy.health };
+            });
+          }
           enemies.splice(index, 1);
         }
       });
 
-      requestAnimationFrame(() => gameLoop(ctx));
+      frameId = requestAnimationFrame(() => gameLoop(ctx));
     }
 
-    const frameId = requestAnimationFrame(() => gameLoop(ctx));
+    frameId = requestAnimationFrame(() => gameLoop(ctx));
 
     return () => cancelAnimationFrame(frameId);
+  }, [game.paused]);
+
+  // keyboard controls effect
+  useEffect(() => {
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        setGame((prev) => ({ ...prev, paused: !prev.paused }));
+      }
+    });
   }, []);
 
-  useEffect(() => {
-    if (game.hp <= 0) setGame({ ...game, over: true });
-  }, [game.hp]);
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const cv = canvas.current;
+    if (!cv) return;
+
+    const rect = cv.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    const x = Math.floor(mouseX / TILE_SIZE);
+    const y = Math.floor(mouseY / TILE_SIZE);
+
+    if (x >= 0 && x < ROWS_COUNT && y >= 0 && y < COLUMNS_COUNT) {
+      hoveredCell.current = { x, y };
+    } else {
+      hoveredCell.current = null;
+    }
+  };
+
+  const handleMouseClick = () => {
+    if (
+      waypoints.find(
+        (w) => w.x === hoveredCell.current?.x && w.y === hoveredCell.current?.y
+      )
+    ) {
+      return;
+    }
+
+    const ctx = canvas.current?.getContext("2d");
+    if (!ctx) return;
+
+    towers.push(new Tower(ctx, hoveredCell.current!.x, hoveredCell.current!.y));
+  };
 
   return (
     <main>
-      <div className="logo">
+      <div className="logo" onClick={() => setGame({ ...game, paused: true })}>
         <img src="/public/tower-defense-logo.png" width={80} />
       </div>
       <p className="user-hp">
@@ -117,12 +178,22 @@ function App() {
           ref={canvas}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
+          onMouseMove={handleMouseMove}
+          onClick={handleMouseClick}
         ></canvas>
       </section>
       {game.over && (
         <div className="overlay">
           <p>Game over</p>
           <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      )}
+      {!game.over && game.paused && (
+        <div className="overlay">
+          <p>Paused</p>
+          <button onClick={() => setGame({ ...game, paused: false })}>
+            Continue
+          </button>
         </div>
       )}
     </main>
