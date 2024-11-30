@@ -9,7 +9,7 @@ export default class Enemy {
   health: number;
   currentWaypointIndex: number;
   waypoints: Point[];
-  destroied: boolean;
+  destroied: "none" | "entered" | "dead";
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -26,15 +26,16 @@ export default class Enemy {
     this.health = health;
     this.currentWaypointIndex = 0;
     this.waypoints = waypoints;
-    this.destroied = false;
+    this.destroied = "none";
   }
 
   update() {
-    if (
-      this.currentWaypointIndex >= this.waypoints.length ||
-      this.health <= 0
-    ) {
-      this.destroied = true;
+    if (this.health <= 0) {
+      this.destroied = "dead";
+      return;
+    }
+    if (this.currentWaypointIndex >= this.waypoints.length) {
+      this.destroied = "entered";
       return;
     } // Reached the end
 

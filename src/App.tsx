@@ -10,7 +10,7 @@ import {
   TILE_SIZE,
 } from "./config/constants";
 import getWaypoints from "./utils/get-waypoints";
-import { Heart, Skull } from "lucide-react";
+import { Coins, Heart, Skull } from "lucide-react";
 import Tower from "./objects/tower";
 import { Point } from "./types/global";
 
@@ -47,6 +47,7 @@ function App() {
     hp: 18,
     currentWave: 1,
     paused: false,
+    coins: 10,
   });
   const hoveredCell = useRef<Point | null>(null);
 
@@ -99,14 +100,16 @@ function App() {
         enemy.update();
         enemy.draw();
 
-        if (enemy.destroied) {
-          if (enemy.health >= 0) {
+        if (enemy.destroied !== "none") {
+          if (enemy.destroied == "entered") {
             setGame((prev) => {
               if (prev.hp - enemy.health <= 0) {
                 return { ...prev, over: true, paused: true, hp: 0 };
               }
               return { ...prev, hp: prev.hp - enemy.health };
             });
+          } else if (enemy.destroied == "dead") {
+            setGame((prev) => ({ ...prev, coins: prev.coins + 5 }));
           }
           enemies.splice(index, 1);
         }
@@ -148,6 +151,8 @@ function App() {
   };
 
   const handleMouseClick = () => {
+    const towerCoins = 5;
+
     if (
       waypoints.find(
         (w) => w.x === hoveredCell.current?.x && w.y === hoveredCell.current?.y
@@ -159,7 +164,12 @@ function App() {
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
 
-    towers.push(new Tower(ctx, hoveredCell.current!.x, hoveredCell.current!.y));
+    if (game.coins >= towerCoins) {
+      towers.push(
+        new Tower(ctx, hoveredCell.current!.x, hoveredCell.current!.y)
+      );
+      setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
+    }
   };
 
   return (
@@ -172,6 +182,9 @@ function App() {
       </p>
       <p className="enemies-count">
         {game.enemiesCount} <Skull fill="#000" stroke="#FF4500" />
+      </p>
+      <p className="coins-count">
+        {game.coins} <Coins fill="#000" stroke="#45FF00" />
       </p>
       <section>
         <canvas

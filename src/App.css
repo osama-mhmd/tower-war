@@ -55,7 +55,8 @@ section {
   transform: scale(1.1);
 }
 .enemies-count,
-.user-hp {
+.user-hp,
+.coins-count {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -65,4 +66,7 @@ section {
 }
 .enemies-count {
   top: 3rem;
+}
+.coins-count {
+  top: 5rem;
 }
