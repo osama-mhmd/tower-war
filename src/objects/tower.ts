@@ -48,7 +48,9 @@ export default class Tower {
     const top = this.y * TILE_SIZE;
 
     this.ctx.fillStyle = "blue";
-    this.ctx.fillRect(left, top, size, size);
+    const image = new Image(64, 64);
+    image.src = "/castle-tower.png";
+    this.ctx.drawImage(image, left, top, size, size);
 
     this.ctx.beginPath();
     this.ctx.arc(

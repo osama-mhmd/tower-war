@@ -13,6 +13,8 @@ import getWaypoints from "./utils/get-waypoints";
 import { Coins, Heart, Skull } from "lucide-react";
 import Tower from "./objects/tower";
 import { Point } from "./types/global";
+import { useToast } from "./components/toaster";
+// import toast from "./utils/toast";
 
 let frameId: number;
 
@@ -41,6 +43,7 @@ let enemies: Enemy[] = [];
 let towers: Tower[] = [];
 
 function App() {
+  const toast = useToast();
   const [game, setGame] = useState({
     enemiesCount: 0,
     over: false,
@@ -72,19 +75,46 @@ function App() {
         case 1:
           if (randomX < 1) {
             enemies.push(new Enemy(ctx, entry.x, entry.y, 0.02, 5, waypoints));
-            setGame((prev) => ({
-              ...prev,
-              enemiesCount: prev.enemiesCount + 1,
-            }));
+            setGame((prev) => {
+              const newCount = prev.enemiesCount + 1;
+
+              if (newCount == 5)
+                setGame((prev) => ({ ...prev, currentWave: 2 }));
+
+              return {
+                ...prev,
+                enemiesCount: newCount,
+              };
+            });
           }
           break;
         case 2:
           if (randomX < 3) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.04, 5, waypoints));
-            setGame((prev) => ({
-              ...prev,
-              enemiesCount: prev.enemiesCount + 1,
-            }));
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.04, 11, waypoints));
+            setGame((prev) => {
+              const newCount = prev.enemiesCount + 1;
+
+              if (newCount == 25)
+                setGame((prev) => ({ ...prev, currentWave: 3 }));
+
+              return {
+                ...prev,
+                enemiesCount: newCount,
+              };
+            });
+          }
+          break;
+        case 3:
+          if (randomX < 10) {
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 15, waypoints));
+            setGame((prev) => {
+              const newCount = prev.enemiesCount + 1;
+
+              return {
+                ...prev,
+                enemiesCount: newCount,
+              };
+            });
           }
           break;
       }
@@ -131,6 +161,12 @@ function App() {
       }
     });
   }, []);
+
+  // wave effect
+  useEffect(() => {
+    toast(`Wave ${game.currentWave} 🔥`);
+    console.log("wave");
+  }, [game.currentWave]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const cv = canvas.current;
