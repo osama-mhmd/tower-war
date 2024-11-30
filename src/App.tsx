@@ -165,7 +165,7 @@ function App() {
   return (
     <main>
       <div className="logo" onClick={() => setGame({ ...game, paused: true })}>
-        <img src="/public/tower-defense-logo.png" width={80} />
+        <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
       <p className="user-hp">
         {game.hp} <Heart fill="red" stroke="#d30" />
