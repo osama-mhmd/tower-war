@@ -14,7 +14,6 @@ import { Coins, Heart, Skull } from "lucide-react";
 import Tower from "./objects/tower";
 import { Point } from "./types/global";
 import { useToast } from "./components/toaster";
-// import toast from "./utils/toast";
 
 let frameId: number;
 
@@ -48,7 +47,7 @@ function App() {
     enemiesCount: 0,
     over: false,
     hp: 18,
-    currentWave: 1,
+    // currentWave: 1,
     paused: false,
     coins: 10,
   });
@@ -56,6 +55,7 @@ function App() {
 
   const canvas = useRef<HTMLCanvasElement>(null);
   const gameTime = useRef<number>(0);
+  const currentWave = useRef<number>(1);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -71,15 +71,17 @@ function App() {
 
       // spawn enemies
       const randomX = Math.floor(Math.random() * 100);
-      switch (game.currentWave) {
+      switch (currentWave.current) {
         case 1:
-          if (randomX < 1) {
+          if (randomX < 3) {
             enemies.push(new Enemy(ctx, entry.x, entry.y, 0.02, 5, waypoints));
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
 
-              if (newCount == 5)
-                setGame((prev) => ({ ...prev, currentWave: 2 }));
+              if (newCount == 15) {
+                currentWave.current++;
+                toast("Wave 2 🔥");
+              }
 
               return {
                 ...prev,
@@ -90,12 +92,14 @@ function App() {
           break;
         case 2:
           if (randomX < 3) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.04, 11, waypoints));
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.04, 8, waypoints));
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
 
-              if (newCount == 25)
-                setGame((prev) => ({ ...prev, currentWave: 3 }));
+              if (newCount == 30) {
+                currentWave.current++;
+                toast("Wave 3 🔥");
+              }
 
               return {
                 ...prev,
@@ -105,7 +109,7 @@ function App() {
           }
           break;
         case 3:
-          if (randomX < 10) {
+          if (randomX < 3) {
             enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 15, waypoints));
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
@@ -121,7 +125,8 @@ function App() {
 
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      drawGrid(ctx, grid, hoveredCell.current);
+      // drawGrid(ctx, grid, hoveredCell.current);
+      drawGrid(ctx, grid);
 
       towers.forEach((tower) => tower.shoot(enemies, gameTime.current));
       towers.forEach((tower) => tower.draw());
@@ -162,12 +167,6 @@ function App() {
     });
   }, []);
 
-  // wave effect
-  useEffect(() => {
-    toast(`Wave ${game.currentWave} 🔥`);
-    console.log("wave");
-  }, [game.currentWave]);
-
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const cv = canvas.current;
     if (!cv) return;
@@ -180,7 +179,16 @@ function App() {
     const y = Math.floor(mouseY / TILE_SIZE);
 
     if (x >= 0 && x < ROWS_COUNT && y >= 0 && y < COLUMNS_COUNT) {
-      hoveredCell.current = { x, y };
+      const tower = towers.find((t) => t.x === x && t.y === y);
+      if (tower) {
+        hoveredCell.current = {
+          x,
+          y,
+          type: "tower",
+          level: tower.level,
+          max: tower.max,
+        };
+      } else hoveredCell.current = { x, y };
     } else {
       hoveredCell.current = null;
     }
@@ -200,10 +208,27 @@ function App() {
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
 
-    if (game.coins >= towerCoins) {
-      towers.push(
-        new Tower(ctx, hoveredCell.current!.x, hoveredCell.current!.y)
+    if (hoveredCell.current!.type == "tower") {
+      const tower = towers.find(
+        (t) => t.x === hoveredCell.current!.x && t.y === hoveredCell.current!.y
       );
+
+      if (!tower) return;
+
+      tower.upgrade();
+
+      return;
+    }
+
+    if (game.coins >= towerCoins) {
+      const { x, y } = hoveredCell.current!;
+      towers.push(new Tower(ctx, x, y));
+      hoveredCell.current = {
+        x,
+        y,
+        type: "tower",
+        level: 1,
+      };
       setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
     }
   };
