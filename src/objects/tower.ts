@@ -1,4 +1,5 @@
 import { TILE_SIZE } from "../config/constants";
+import Bullet from "./bullet";
 import Enemy from "./enemy";
 
 function calculateAngle(tower: Tower, enemy: Enemy) {
@@ -18,6 +19,7 @@ export default class Tower {
   level: number;
   max: boolean;
   angle: number;
+  bullets: Bullet[];
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -37,22 +39,35 @@ export default class Tower {
     this.level = 1;
     this.max = false;
     this.angle = 0;
+    this.bullets = [];
   }
 
-  shoot(enemies: Enemy[], gameTime: number) {
-    if (gameTime - this.lastShot > 60 / this.attackSpeed) {
-      const target = enemies.find((e) => {
-        const dx = e.x - this.x;
-        const dy = e.y - this.y;
-        return Math.sqrt(dx * dx + dy * dy) <= this.range;
-      });
+  // shoot(enemies: Enemy[], gameTime: number) {
+  fire(target: Enemy, distance: number, gameTime: number) {
+    const bullet = new Bullet(0, 0, distance, 20);
+    this.bullets.push(bullet);
 
-      if (target) {
-        target.health -= this.damage;
-        this.lastShot = gameTime;
-        this.angle = calculateAngle(this, target);
-      }
-    }
+    this.lastShot = gameTime;
+    this.angle = calculateAngle(this, target);
+    target.health -= this.damage;
+  }
+
+  update(enemies: Enemy[], gameTime: number) {
+    if (gameTime - this.lastShot <= 60 / this.attackSpeed) return;
+
+    let distance = 0;
+
+    const target = enemies.find((enemy) => {
+      distance = Math.hypot(enemy.x - this.x, enemy.y - this.y);
+
+      if (distance <= this.range) return true;
+    });
+
+    if (target) this.fire(target, distance, gameTime);
+
+    this.bullets.forEach((bullet) => bullet.update());
+
+    this.bullets = this.bullets.filter((bullet) => !bullet.isDestroyed);
   }
 
   draw() {
@@ -72,6 +87,9 @@ export default class Tower {
     t.src = "/textures/towerDefense_tile249.png";
     const offsetX = size / 6;
     this.ctx.drawImage(t, -size / 2, -size / 2 - offsetX, size, size);
+
+    // Draw rockets
+    this.bullets.forEach((bullet) => bullet.draw(this.ctx));
 
     this.ctx.restore();
   }

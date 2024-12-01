@@ -63,6 +63,17 @@ function App() {
     const ctx = canvas.current.getContext("2d");
     if (!ctx) return;
 
+    const offscreenCanvas = document.createElement("canvas");
+    const offscreenCtx = offscreenCanvas.getContext("2d");
+
+    if (!offscreenCtx) return;
+
+    // Set the size of the offscreen canvas to match your grid
+    offscreenCanvas.width = CANVAS_WIDTH;
+    offscreenCanvas.height = CANVAS_HEIGHT;
+
+    drawGrid(offscreenCtx, grid);
+
     function gameLoop(ctx: any) {
       if (game.paused) return;
 
@@ -114,6 +125,49 @@ function App() {
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
 
+              if (newCount == 70) {
+                currentWave.current++;
+                toast("You choose the wrong path 💀. WAVE 4 🔥");
+              }
+
+              return {
+                ...prev,
+                enemiesCount: newCount,
+              };
+            });
+          }
+          break;
+        case 4:
+          if (randomX < 3) {
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 30, waypoints));
+            setGame((prev) => {
+              const newCount = prev.enemiesCount + 1;
+
+              if (newCount == 100) {
+                currentWave.current++;
+                toast("YOU WILL REGET KILLING 100 ENEMIES. WAVE 5 🔥");
+              }
+
+              return {
+                ...prev,
+                enemiesCount: newCount,
+              };
+            });
+          }
+          break;
+        case 5:
+          if (randomX < 5) {
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.15, 35, waypoints));
+            setGame((prev) => {
+              const newCount = prev.enemiesCount + 1;
+
+              if (newCount == 102) {
+                toast("CATCH ME IF YOU CAN 🤞");
+                enemies.push(
+                  new Enemy(ctx, entry.x, entry.y, 0.4, 35, waypoints)
+                );
+              }
+
               return {
                 ...prev,
                 enemiesCount: newCount,
@@ -126,9 +180,9 @@ function App() {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       // drawGrid(ctx, grid, hoveredCell.current);
-      drawGrid(ctx, grid);
+      ctx.drawImage(offscreenCanvas, 0, 0);
 
-      towers.forEach((tower) => tower.shoot(enemies, gameTime.current));
+      towers.forEach((tower) => tower.update(enemies, gameTime.current));
       towers.forEach((tower) => tower.draw());
 
       enemies.forEach((enemy, index) => {
