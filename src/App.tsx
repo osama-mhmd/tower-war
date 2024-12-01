@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import drawGrid from "./utils/draw-grid";
 import Enemy from "./objects/enemy";
 import {
   CANVAS_HEIGHT,
@@ -14,10 +13,11 @@ import { Coins, Heart, Skull } from "lucide-react";
 import Tower from "./objects/tower";
 import { Point } from "./types/global";
 import { useToast } from "./components/toaster";
+import OffscreenCanvas from "./components/offscreen-canvas";
 
 let frameId: number;
 
-const grid = [
+export const grid = [
   [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
   [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -54,6 +54,7 @@ function App() {
   const hoveredCell = useRef<Point | null>(null);
 
   const canvas = useRef<HTMLCanvasElement>(null);
+
   const gameTime = useRef<number>(0);
   const currentWave = useRef<number>(1);
 
@@ -62,17 +63,6 @@ function App() {
 
     const ctx = canvas.current.getContext("2d");
     if (!ctx) return;
-
-    const offscreenCanvas = document.createElement("canvas");
-    const offscreenCtx = offscreenCanvas.getContext("2d");
-
-    if (!offscreenCtx) return;
-
-    // Set the size of the offscreen canvas to match your grid
-    offscreenCanvas.width = CANVAS_WIDTH;
-    offscreenCanvas.height = CANVAS_HEIGHT;
-
-    drawGrid(offscreenCtx, grid);
 
     function gameLoop(ctx: any) {
       if (game.paused) return;
@@ -180,7 +170,6 @@ function App() {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
       // drawGrid(ctx, grid, hoveredCell.current);
-      ctx.drawImage(offscreenCanvas, 0, 0);
 
       towers.forEach((tower) => tower.update(enemies, gameTime.current));
       towers.forEach((tower) => tower.draw());
@@ -302,6 +291,7 @@ function App() {
         {game.coins} <Coins fill="#000" stroke="#45FF00" />
       </p>
       <section>
+        <OffscreenCanvas />
         <canvas
           ref={canvas}
           width={CANVAS_WIDTH}

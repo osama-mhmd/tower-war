@@ -1,9 +1,6 @@
 import { TILE_SIZE, ROWS_COUNT, COLUMNS_COUNT } from "../config/constants";
 // import { Point } from "../types/global";
 
-const grassTexture = new Image();
-grassTexture.src = "/textures/towerDefense_tile024.png";
-
 function getPathTexture(grid: number[][], row: number, col: number) {
   const top = grid[row - 1]?.[col] === 1; // Check if top is a path
   const bottom = grid[row + 1]?.[col] === 1;
@@ -64,7 +61,7 @@ export default function drawGrid(
         const textureKey = getPathTexture(grid, row, col);
 
         for (let i = 0; i < 4; i++) {
-          const image = new Image(64, 64);
+          const image = new Image();
           image.src = `/textures/${textures[textureKey][i]}.png`;
 
           let offsetX = 0;
@@ -79,22 +76,29 @@ export default function drawGrid(
             offsetY = TILE_SIZE / 2;
           }
 
-          ctx.drawImage(
-            image,
-            col * TILE_SIZE + offsetX,
-            row * TILE_SIZE + offsetY,
-            TILE_SIZE / 2,
-            TILE_SIZE / 2
-          );
+          image.onload = () => {
+            ctx.drawImage(
+              image,
+              col * TILE_SIZE + offsetX,
+              row * TILE_SIZE + offsetY,
+              TILE_SIZE / 2,
+              TILE_SIZE / 2
+            );
+          };
         }
       } else {
-        ctx.drawImage(
-          grassTexture,
-          col * TILE_SIZE,
-          row * TILE_SIZE,
-          TILE_SIZE,
-          TILE_SIZE
-        );
+        const grassTexture = new Image();
+        grassTexture.src = "/textures/towerDefense_tile024.png";
+
+        grassTexture.onload = () => {
+          ctx.drawImage(
+            grassTexture,
+            col * TILE_SIZE,
+            row * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        };
       }
     }
   }
