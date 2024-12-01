@@ -1,6 +1,12 @@
 import { TILE_SIZE } from "../config/constants";
 import Enemy from "./enemy";
 
+function calculateAngle(tower: Tower, enemy: Enemy) {
+  const dx = enemy.x * TILE_SIZE - tower.x * TILE_SIZE;
+  const dy = enemy.y * TILE_SIZE - tower.y * TILE_SIZE;
+  return Math.atan2(dy, dx);
+}
+
 export default class Tower {
   ctx: CanvasRenderingContext2D;
   x: number;
@@ -11,6 +17,7 @@ export default class Tower {
   damage: number;
   level: number;
   max: boolean;
+  angle: number;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -29,6 +36,7 @@ export default class Tower {
     this.lastShot = 0;
     this.level = 1;
     this.max = false;
+    this.angle = 0;
   }
 
   shoot(enemies: Enemy[], gameTime: number) {
@@ -42,6 +50,7 @@ export default class Tower {
       if (target) {
         target.health -= this.damage;
         this.lastShot = gameTime;
+        this.angle = calculateAngle(this, target);
       }
     }
   }
@@ -52,12 +61,19 @@ export default class Tower {
     const top = this.y * TILE_SIZE;
 
     const g = new Image(64, 64);
-    g.src = "/textures/towerDefense_tile182.png";
+    g.src = "/textures/towerDefense_tile180.png";
     this.ctx.drawImage(g, left, top, size, size);
 
+    this.ctx.save();
+    this.ctx.translate(left + size / 2, top + size / 2);
+    this.ctx.rotate(this.angle + 1.5708); // 1.5708rad = 90deg
+
     const t = new Image(64, 64);
-    t.src = "/textures/towerDefense_tile204.png";
-    this.ctx.drawImage(t, left, top, size, size);
+    t.src = "/textures/towerDefense_tile249.png";
+    const offsetX = size / 6;
+    this.ctx.drawImage(t, -size / 2, -size / 2 - offsetX, size, size);
+
+    this.ctx.restore();
   }
 
   upgrade() {
