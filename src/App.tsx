@@ -15,6 +15,8 @@ import { Point } from "./types/global";
 import { useToast } from "./components/toaster";
 import OffscreenCanvas from "./components/offscreen-canvas";
 import Effect from "./objects/effect";
+import hover from "./utils/hover";
+import useCells from "./stores/cells";
 
 let frameId: number;
 
@@ -23,6 +25,7 @@ let towers: Tower[] = [];
 
 function App() {
   const toast = useToast();
+  const { set, get } = useCells();
   const [game, setGame] = useState({
     enemiesCount: 0,
     over: false,
@@ -40,7 +43,14 @@ function App() {
 
   const gameTime = useRef<number>(0);
   const currentWave = useRef<number>(1);
-  const { grid, waypoints } = useMemo(() => generateGrid(2), []);
+
+  const { grid, waypoints } = useMemo(() => {
+    const { grid, waypoints } = generateGrid(2);
+    waypoints.forEach((waypoint) => {
+      set(`${waypoint.x},${waypoint.y}`, waypoint);
+    });
+    return { grid, waypoints };
+  }, []);
   const entry = useMemo(() => waypoints[0], [waypoints]);
 
   useEffect(() => {
@@ -157,7 +167,7 @@ function App() {
 
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // drawGrid(ctx, grid, hoveredCell.current);
+      hover(ctx, hoveredCell.current);
 
       towers.forEach((tower) => tower.update(enemies, gameTime.current));
       towers.forEach((tower) => tower.draw());
@@ -214,16 +224,10 @@ function App() {
     const y = Math.floor(mouseY / TILE_SIZE);
 
     if (x >= 0 && x < ROWS_COUNT && y >= 0 && y < COLUMNS_COUNT) {
-      const tower = towers.find((t) => t.x === x && t.y === y);
-      if (tower) {
-        hoveredCell.current = {
-          x,
-          y,
-          type: "tower",
-          level: tower.level,
-          max: tower.max,
-        };
-      } else hoveredCell.current = { x, y };
+      const cell = get(`${x},${y}`);
+
+      if (cell) hoveredCell.current = cell;
+      else hoveredCell.current = { x, y };
     } else {
       hoveredCell.current = null;
     }
@@ -233,9 +237,8 @@ function App() {
     const towerCoins = 5;
 
     if (
-      waypoints.find(
-        (w) => w.x === hoveredCell.current?.x && w.y === hoveredCell.current?.y
-      )
+      hoveredCell.current!.type == "path" ||
+      hoveredCell.current!.type == "something"
     ) {
       return;
     }
@@ -244,13 +247,31 @@ function App() {
     if (!ctx) return;
 
     if (hoveredCell.current!.type == "tower") {
-      const tower = towers.find(
+      if (game.coins < towerCoins) return;
+
+      const t = towers.find(
         (t) => t.x === hoveredCell.current!.x && t.y === hoveredCell.current!.y
       );
 
-      if (!tower) return;
+      if (!t) return;
 
-      tower.upgrade();
+      const result = t.upgrade();
+
+      if (result) {
+        const newCell: Point = {
+          x: t.x,
+          y: t.y,
+          type: "tower",
+          level: t.level,
+          max: t.max,
+        };
+
+        set(`${t.x},${t.y}`, newCell);
+
+        hoveredCell.current = newCell;
+
+        setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
+      }
 
       return;
     }
@@ -264,6 +285,7 @@ function App() {
         type: "tower",
         level: 1,
       };
+      set(`${x},${y}`, hoveredCell.current);
       setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
     }
   };

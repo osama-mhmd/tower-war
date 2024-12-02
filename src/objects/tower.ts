@@ -94,13 +94,15 @@ export default class Tower {
     this.ctx.restore();
   }
 
-  upgrade() {
-    if (this.level == 5) {
-      this.max = true;
-      return;
-    }
+  upgrade(): boolean {
+    if (this.max) return false;
+
     this.level++;
     this.range += 1;
     this.attackSpeed += 0.1;
+
+    if (this.level == 5) this.max = true;
+
+    return true;
   }
 }
