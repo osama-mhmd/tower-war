@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../config/constants";
 import drawGrid from "../utils/draw-grid";
-import { grid } from "../App";
 
-export default function OffscreenCanvas() {
+export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

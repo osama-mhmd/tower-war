@@ -7,11 +7,16 @@ function getPathTexture(grid: number[][], row: number, col: number) {
   const left = grid[row]?.[col - 1] === 1;
   const right = grid[row]?.[col + 1] === 1;
 
+  // if (top && right && left) return "t-top-rl";
+  // if (bottom && right && left) return "t-bottom-rl";
+  // if (top && bottom && right) return "t-top-br";
+  // if (top && bottom && left) return "t-top-bl";
   if (top && bottom) return "vertical";
   if (left && right) return "horizontal";
   if (top && right) return "corner-top-right";
   if (top && left) return "corner-top-left";
   if (bottom && right) return "corner-bottom-right";
+  if (bottom && left) return "corner-bottom-left";
   return "vertical";
 }
 
@@ -44,6 +49,24 @@ const textures = {
     "towerDefense_tile003",
     "towerDefense_tile047",
     "towerDefense_tile025",
+    "towerDefense_tile299",
+  ],
+  "corner-bottom-left": [
+    "towerDefense_tile047",
+    "towerDefense_tile004",
+    "towerDefense_tile002",
+    "towerDefense_tile023",
+  ],
+  "t-top-rl": [
+    "towerDefense_tile053",
+    "towerDefense_tile051",
+    "towerDefense_tile001",
+    "towerDefense_tile001",
+  ],
+  "t-bottom-rl": [
+    "towerDefense_tile047",
+    "towerDefense_tile047",
+    "towerDefense_tile002",
     "towerDefense_tile299",
   ],
 };

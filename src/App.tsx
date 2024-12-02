@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import Enemy from "./objects/enemy";
 import {
@@ -8,7 +8,7 @@ import {
   ROWS_COUNT,
   TILE_SIZE,
 } from "./config/constants";
-import getWaypoints from "./utils/get-waypoints";
+import generateGrid from "./utils/generate-grid";
 import { Coins, Heart, Skull } from "lucide-react";
 import Tower from "./objects/tower";
 import { Point } from "./types/global";
@@ -16,27 +16,6 @@ import { useToast } from "./components/toaster";
 import OffscreenCanvas from "./components/offscreen-canvas";
 
 let frameId: number;
-
-export const grid = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-];
-
-const entry = {
-  x: 8,
-  y: -1,
-};
-
-const waypoints = getWaypoints(grid);
 
 let enemies: Enemy[] = [];
 let towers: Tower[] = [];
@@ -57,6 +36,8 @@ function App() {
 
   const gameTime = useRef<number>(0);
   const currentWave = useRef<number>(1);
+  const { grid, waypoints } = useMemo(() => generateGrid(2), []);
+  const entry = useMemo(() => waypoints[0], [waypoints]);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -291,7 +272,7 @@ function App() {
         {game.coins} <Coins fill="#000" stroke="#45FF00" />
       </p>
       <section>
-        <OffscreenCanvas />
+        <OffscreenCanvas grid={grid} />
         <canvas
           ref={canvas}
           width={CANVAS_WIDTH}
