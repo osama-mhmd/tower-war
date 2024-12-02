@@ -122,6 +122,20 @@ export default function drawGrid(
             TILE_SIZE
           );
         };
+
+        // TODO: Drawing slots for avaliable places for towrs
+        // const slot = new Image();
+        // slot.src = "/textures/towerDefense_tile018.png";
+
+        // slot.onload = () => {
+        //   ctx.drawImage(
+        //     slot,
+        //     col * TILE_SIZE,
+        //     row * TILE_SIZE,
+        //     TILE_SIZE,
+        //     TILE_SIZE
+        //   );
+        // };
       }
     }
   }

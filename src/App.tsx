@@ -14,6 +14,7 @@ import Tower from "./objects/tower";
 import { Point } from "./types/global";
 import { useToast } from "./components/toaster";
 import OffscreenCanvas from "./components/offscreen-canvas";
+import Effect from "./objects/effect";
 
 let frameId: number;
 
@@ -30,6 +31,9 @@ function App() {
     paused: false,
     coins: 10,
   });
+  const [objects, setObjects] = useState({
+    effects: [] as Effect[],
+  });
   const hoveredCell = useRef<Point | null>(null);
 
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -45,7 +49,7 @@ function App() {
     const ctx = canvas.current.getContext("2d");
     if (!ctx) return;
 
-    function gameLoop(ctx: any) {
+    function gameLoop(ctx: CanvasRenderingContext2D) {
       if (game.paused) return;
 
       // update time
@@ -171,6 +175,10 @@ function App() {
               return { ...prev, hp: prev.hp - enemy.health };
             });
           } else if (enemy.destroied == "dead") {
+            setObjects((prev) => ({
+              ...prev,
+              effects: [...prev.effects, new Effect(enemy.x, enemy.y)],
+            }));
             setGame((prev) => ({ ...prev, coins: prev.coins + 5 }));
           }
           enemies.splice(index, 1);
@@ -278,7 +286,7 @@ function App() {
         <span>WAVE</span> {game.currentWave}
       </p>
       <section>
-        <OffscreenCanvas grid={grid} />
+        <OffscreenCanvas grid={grid} effects={objects.effects} />
         <canvas
           ref={canvas}
           width={CANVAS_WIDTH}
