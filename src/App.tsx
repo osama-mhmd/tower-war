@@ -26,7 +26,7 @@ function App() {
     enemiesCount: 0,
     over: false,
     hp: 18,
-    // currentWave: 1,
+    currentWave: 1,
     paused: false,
     coins: 10,
   });
@@ -62,11 +62,11 @@ function App() {
 
               if (newCount == 15) {
                 currentWave.current++;
-                toast("Wave 2 🔥");
               }
 
               return {
                 ...prev,
+                currentWave: currentWave.current,
                 enemiesCount: newCount,
               };
             });
@@ -80,11 +80,11 @@ function App() {
 
               if (newCount == 30) {
                 currentWave.current++;
-                toast("Wave 3 🔥");
               }
 
               return {
                 ...prev,
+                currentWave: currentWave.current,
                 enemiesCount: newCount,
               };
             });
@@ -103,6 +103,7 @@ function App() {
 
               return {
                 ...prev,
+                currentWave: currentWave.current,
                 enemiesCount: newCount,
               };
             });
@@ -121,6 +122,7 @@ function App() {
 
               return {
                 ...prev,
+                currentWave: currentWave.current,
                 enemiesCount: newCount,
               };
             });
@@ -141,6 +143,7 @@ function App() {
 
               return {
                 ...prev,
+                currentWave: currentWave.current,
                 enemiesCount: newCount,
               };
             });
@@ -270,6 +273,9 @@ function App() {
       </p>
       <p className="coins-count">
         {game.coins} <Coins fill="#000" stroke="#45FF00" />
+      </p>
+      <p className="wave-number">
+        <span>WAVE</span> {game.currentWave}
       </p>
       <section>
         <OffscreenCanvas grid={grid} />

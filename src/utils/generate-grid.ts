@@ -35,6 +35,7 @@ export default function generateGrid(complexity: number = 1): {
   // TODO: Random Entry
   y = randInt;
 
+  waypoints.push({ x: y, y: x - 1, type: "path" });
   waypoints.push({ x: y, y: x, type: "path" });
 
   grid[x][y] = 1;
@@ -113,7 +114,10 @@ export default function generateGrid(complexity: number = 1): {
     waypoints.push({ x: y, y: x, type: "path" });
   }
 
-  if (waypoints[waypoints.length - 1].y !== ROWS_COUNT - 1) {
+  const lastWaypoint = waypoints[waypoints.length - 1];
+  waypoints.push({ x: lastWaypoint.x, y: lastWaypoint.y + 1 });
+
+  if (waypoints[waypoints.length - 1].y !== ROWS_COUNT) {
     throw new Error("Waypoints are not generated correctly");
   }
 

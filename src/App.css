@@ -77,3 +77,18 @@ section {
   top: 50%;
   translate: -50% -50%;
 }
+.wave-number {
+  position: absolute;
+  padding: 0.25rem 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 0 4px #555;
+}
+.wave-number span {
+  letter-spacing: 0.75ch;
+  margin-inline-end: 0.5rem;
+}
