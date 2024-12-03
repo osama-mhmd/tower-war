@@ -42,9 +42,8 @@ export default class Tower {
     this.bullets = [];
   }
 
-  // shoot(enemies: Enemy[], gameTime: number) {
   fire(target: Enemy, distance: number, gameTime: number) {
-    const bullet = new Bullet(0, 0, distance, 20);
+    const bullet = new Bullet(distance, 0.3);
     this.bullets.push(bullet);
 
     this.lastShot = gameTime;
@@ -53,6 +52,11 @@ export default class Tower {
   }
 
   update(enemies: Enemy[], gameTime: number) {
+    // handle bullets
+    this.bullets.forEach((bullet) => bullet.update());
+    this.bullets = this.bullets.filter((bullet) => !bullet.isDestroyed);
+    this.bullets.forEach((bullet) => bullet.draw(this.ctx));
+
     if (gameTime - this.lastShot <= 60 / this.attackSpeed) return;
 
     let distance = 0;
@@ -64,10 +68,6 @@ export default class Tower {
     });
 
     if (target) this.fire(target, distance, gameTime);
-
-    this.bullets.forEach((bullet) => bullet.update());
-
-    this.bullets = this.bullets.filter((bullet) => !bullet.isDestroyed);
   }
 
   draw() {

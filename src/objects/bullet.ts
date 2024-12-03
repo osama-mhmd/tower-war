@@ -1,15 +1,12 @@
 import { TILE_SIZE } from "../config/constants";
 
 export default class Bullet {
-  x: number;
-  y: number;
+  y: number = 0;
   distance: number;
   speed: number;
   isDestroyed: boolean;
 
-  constructor(x: number, y: number, distance: number, speed: number) {
-    this.x = x; // Current position
-    this.y = y;
+  constructor(distance: number, speed: number) {
     this.distance = distance;
     this.speed = speed;
     this.isDestroyed = false;
@@ -17,7 +14,7 @@ export default class Bullet {
 
   // Update the rocket's position
   update() {
-    this.y += 1;
+    this.y += this.speed;
 
     if (this.y >= this.distance) {
       this.isDestroyed = true;
