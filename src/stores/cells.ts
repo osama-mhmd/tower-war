@@ -5,6 +5,7 @@ export interface Store {
   cells: Map<string, Point>;
   set: (key: string, value: Point) => void;
   get: (key: string) => Point | undefined;
+  reset: () => void;
 }
 
 const useCells = create<Store>((set, get) => ({
@@ -17,6 +18,9 @@ const useCells = create<Store>((set, get) => ({
   },
   get: (key: string) => {
     return get().cells.get(key);
+  },
+  reset: () => {
+    set({ cells: new Map<string, Point>() });
   },
 }));
 

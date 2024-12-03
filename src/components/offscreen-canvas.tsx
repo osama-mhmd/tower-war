@@ -44,7 +44,11 @@ export default function OffscreenCanvas({
       offsetY: 0.4,
       onPath: true,
     });
-  }, []);
+
+    return () => {
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    };
+  }, [grid]);
 
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");

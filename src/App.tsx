@@ -23,17 +23,32 @@ let frameId: number;
 const enemies: Enemy[] = [];
 const towers: Tower[] = [];
 
+interface Game {
+  enemiesCount: number;
+  over: boolean;
+  hp: number;
+  currentWave: number;
+  paused: boolean;
+  coins: number;
+  level: number;
+  trial: number;
+}
+
+const defaultGame: Game = {
+  enemiesCount: 0,
+  over: false,
+  hp: 18,
+  currentWave: 1,
+  paused: false,
+  coins: 10,
+  level: 1,
+  trial: 1,
+};
+
 function App() {
   const toast = useToast();
-  const { set, get } = useCells();
-  const [game, setGame] = useState({
-    enemiesCount: 0,
-    over: false,
-    hp: 18,
-    currentWave: 1,
-    paused: false,
-    coins: 10,
-  });
+  const cells = useCells();
+  const [game, setGame] = useState<Game>(defaultGame);
   const [objects, setObjects] = useState({
     effects: [] as Effect[],
   });
@@ -46,12 +61,33 @@ function App() {
 
   const { grid, waypoints } = useMemo(() => {
     const { grid, waypoints } = generateGrid(2);
+
+    cells.reset();
+
     waypoints.forEach((waypoint) => {
-      set(`${waypoint.x},${waypoint.y}`, waypoint);
+      cells.set(`${waypoint.x},${waypoint.y}`, waypoint);
     });
+
     return { grid, waypoints };
-  }, []);
+  }, [game.trial, game.level]);
   const entry = useMemo(() => waypoints[0], [waypoints]);
+
+  function resetGame(incTrial: boolean = true, incLevel = false) {
+    setGame((prev) => {
+      console.log(prev.trial + 1);
+      return {
+        ...defaultGame,
+        trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
+        level: incLevel ? prev.level + 1 : prev.level, // increase level
+      };
+    });
+
+    currentWave.current = 1;
+    gameTime.current = 0;
+
+    enemies.splice(0, enemies.length);
+    towers.splice(0, towers.length);
+  }
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -224,13 +260,15 @@ function App() {
     const y = Math.floor(mouseY / TILE_SIZE);
 
     if (x >= 0 && x < ROWS_COUNT && y >= 0 && y < COLUMNS_COUNT) {
-      const cell = get(`${x},${y}`);
+      const cell = cells.get(`${x},${y}`);
 
       if (cell) hoveredCell.current = cell;
       else hoveredCell.current = { x, y };
     } else {
       hoveredCell.current = null;
     }
+
+    console.log(hoveredCell.current);
   };
 
   const handleMouseClick = () => {
@@ -266,7 +304,7 @@ function App() {
           max: t.max,
         };
 
-        set(`${t.x},${t.y}`, newCell);
+        cells.set(`${t.x},${t.y}`, newCell);
 
         hoveredCell.current = newCell;
 
@@ -285,7 +323,7 @@ function App() {
         type: "tower",
         level: 1,
       };
-      set(`${x},${y}`, hoveredCell.current);
+      cells.set(`${x},${y}`, hoveredCell.current);
       setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
     }
   };
@@ -320,7 +358,7 @@ function App() {
       {game.over && (
         <div className="overlay">
           <p>Game over</p>
-          <button onClick={() => window.location.reload()}>Retry</button>
+          <button onClick={() => resetGame()}>Retry</button>
         </div>
       )}
       {!game.over && game.paused && (

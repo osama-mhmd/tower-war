@@ -5,9 +5,9 @@ import Toaster from "./components/toaster.tsx";
 import Wrapper from "./wrapper.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <Toaster>
-    <Wrapper>
-      <App />
-    </Wrapper>
-  </Toaster>
+  // <Toaster>
+  <Wrapper>
+    <App />
+  </Wrapper>
+  // </Toaster>
 );
