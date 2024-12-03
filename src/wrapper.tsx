@@ -1,17 +1,23 @@
 import { useState, useEffect } from "react";
-import resources from "./build/resources.json";
+import images from "./config/resources.json";
+
+// `glob` makes a very bad white screen at the first load
+// const images = import.meta.glob("/public/textures/*.png", { eager: true });
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, setState] = useState(
+    "loading" as "loading" | "loaded" | "error"
+  );
 
   useEffect(() => {
-    const promises = resources.map((src) => loadImage(src));
+    // const promises = Object.entries(images).map(([key]: [string, unknown]) =>
+    //   loadImage(key.replace("/public/textures/", ""))
+    // );
+    const promises = images.map((src) => loadImage(src));
 
     Promise.all(promises)
-      .then(() => {
-        setIsLoading(false); // Hide the loading screen
-      })
-      .catch((error) => console.error("Error loading resources:", error));
+      .then(() => setState("loaded"))
+      .catch(() => setState("error"));
   }, []);
 
   const loadImage = (src: string): Promise<HTMLImageElement> => {
@@ -23,12 +29,16 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  if (isLoading) {
+  if (state === "loading") {
     return (
       <div className="loading">
         Loading resources, please wait... <span className="spinner"></span>
       </div>
     );
+  }
+
+  if (state === "error") {
+    return <div className="error">Error loading resources</div>;
   }
 
   return children;

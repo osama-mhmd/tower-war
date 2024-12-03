@@ -20,8 +20,8 @@ import useCells from "./stores/cells";
 
 let frameId: number;
 
-let enemies: Enemy[] = [];
-let towers: Tower[] = [];
+const enemies: Enemy[] = [];
+const towers: Tower[] = [];
 
 function App() {
   const toast = useToast();

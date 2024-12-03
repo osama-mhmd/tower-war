@@ -94,7 +94,8 @@ button:focus-visible {
   }
 }
 
-.loading {
+.loading,
+.error {
   position: fixed;
   top: 0;
   left: 0;
