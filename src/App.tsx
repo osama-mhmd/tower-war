@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import "./App.css";
-import Enemy from "./objects/enemy";
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -10,58 +9,20 @@ import {
 } from "./config/constants";
 import generateGrid from "./utils/generate-grid";
 import { Coins, Heart, Skull } from "lucide-react";
-// import Tower from "./objects/tower";
 import { Context, Point } from "./types/global";
-import { useToast } from "./components/toaster";
 import OffscreenCanvas from "./components/offscreen-canvas";
-import Effect from "./objects/effect";
-import hover from "./utils/hover";
 import useCells from "./stores/cells";
-// import { RocketTower } from "./objects/towers";
-// import DefenseEntity from "./objects/entities/defense-entity";
 import define from "./utils/define-ctx";
-import { Defense, RocketTower as MegaTower } from "./objects/defense";
-
-let frameId: number;
-
-const enemies: Enemy[] = [];
-const towers: Defense[] = [];
-
-interface Game {
-  enemiesCount: number;
-  over: boolean;
-  hp: number;
-  currentWave: number;
-  paused: boolean;
-  coins: number;
-  level: number;
-  trial: number;
-}
-
-const defaultGame: Game = {
-  enemiesCount: 0,
-  over: false,
-  hp: 18,
-  currentWave: 1,
-  paused: false,
-  coins: 10,
-  level: 1,
-  trial: 1,
-};
+import gameLoop from "@/core/gameloop";
+import useGame from "./stores/game";
+import { MegaTower } from "@/entities/towers";
 
 function App() {
-  const toast = useToast();
   const cells = useCells();
-  const [game, setGame] = useState<Game>(defaultGame);
-  const [objects, setObjects] = useState({
-    effects: [] as Effect[],
-  });
-  const hoveredCell = useRef<Point | null>(null);
+
+  const { game, getGame, setGame } = useGame();
 
   const canvas = useRef<HTMLCanvasElement>(null);
-
-  const gameTime = useRef<number>(0);
-  const currentWave = useRef<number>(1);
 
   const { grid, waypoints } = useMemo(() => {
     const { grid, waypoints } = generateGrid(2);
@@ -74,24 +35,25 @@ function App() {
 
     return { grid, waypoints };
   }, [game.trial, game.level]);
+
   const entry = useMemo(() => waypoints[0], [waypoints]);
 
-  function resetGame(incTrial: boolean = true, incLevel = false) {
-    setGame((prev) => {
-      console.log(prev.trial + 1);
-      return {
-        ...defaultGame,
-        trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
-        level: incLevel ? prev.level + 1 : prev.level, // increase level
-      };
-    });
+  // function resetGame(incTrial: boolean = true, incLevel = false) {
+  //   setGame(() => {
+  //     console.log(prev.trial + 1);
+  //     return {
+  //       ...defaultGame,
+  //       trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
+  //       level: incLevel ? prev.level + 1 : prev.level, // increase level
+  //     };
+  //   });
 
-    currentWave.current = 1;
-    gameTime.current = 0;
+  //   currentWave.current = 1;
+  //   gameTime.current = 0;
 
-    enemies.splice(0, enemies.length);
-    towers.splice(0, towers.length);
-  }
+  //   enemies.splice(0, enemies.length);
+  //   towers.splice(0, towers.length);
+  // }
 
   // do once effect
   useEffect(() => {
@@ -109,156 +71,20 @@ function App() {
     const ctx = canvas.current.getContext("2d") as Context;
     if (!ctx) return;
 
-    function gameLoop(ctx: Context) {
-      if (game.paused) return;
+    gameLoop({ ctx, getGame, setGame, entry, waypoints });
 
-      // update time
-      gameTime.current++;
-
-      // spawn enemies
-      const randomX = Math.floor(Math.random() * 100);
-      switch (currentWave.current) {
-        case 1:
-          if (randomX < 1) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.02, 1, waypoints));
-            setGame((prev) => {
-              const newCount = prev.enemiesCount + 1;
-
-              if (newCount == 15) {
-                currentWave.current++;
-              }
-
-              return {
-                ...prev,
-                currentWave: currentWave.current,
-                enemiesCount: newCount,
-              };
-            });
-          }
-          break;
-        case 2:
-          if (randomX < 3) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.04, 8, waypoints));
-            setGame((prev) => {
-              const newCount = prev.enemiesCount + 1;
-
-              if (newCount == 30) {
-                currentWave.current++;
-              }
-
-              return {
-                ...prev,
-                currentWave: currentWave.current,
-                enemiesCount: newCount,
-              };
-            });
-          }
-          break;
-        case 3:
-          if (randomX < 3) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 15, waypoints));
-            setGame((prev) => {
-              const newCount = prev.enemiesCount + 1;
-
-              if (newCount == 70) {
-                currentWave.current++;
-                toast("You choose the wrong path 💀. WAVE 4 🔥");
-              }
-
-              return {
-                ...prev,
-                currentWave: currentWave.current,
-                enemiesCount: newCount,
-              };
-            });
-          }
-          break;
-        case 4:
-          if (randomX < 3) {
-            // enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 30, waypoints));
-            setGame((prev) => {
-              const newCount = prev.enemiesCount + 1;
-
-              if (newCount == 100) {
-                currentWave.current++;
-                toast("YOU WILL REGET KILLING 100 ENEMIES. WAVE 5 🔥");
-              }
-
-              return {
-                ...prev,
-                currentWave: currentWave.current,
-                enemiesCount: newCount,
-              };
-            });
-          }
-          break;
-        case 5:
-          if (randomX < 5) {
-            // enemies.push(new Enemy(ctx, entry.x, entry.y, 0.15, 35, waypoints));
-            setGame((prev) => {
-              const newCount = prev.enemiesCount + 1;
-
-              if (newCount == 102) {
-                toast("CATCH ME IF YOU CAN 🤞");
-                enemies
-                  .push
-                  // new Enemy(ctx, entry.x, entry.y, 0.4, 35, waypoints)
-                  ();
-              }
-
-              return {
-                ...prev,
-                currentWave: currentWave.current,
-                enemiesCount: newCount,
-              };
-            });
-          }
-          break;
-      }
-
-      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      hover(ctx, hoveredCell.current);
-
-      towers.forEach((tower) => tower.update(enemies, gameTime.current));
-      towers.forEach((tower) => tower.draw(ctx));
-
-      enemies.forEach((enemy, index) => {
-        enemy.update();
-        enemy.draw();
-
-        if (enemy.destroied !== "none") {
-          if (enemy.destroied == "entered") {
-            setGame((prev) => {
-              if (prev.hp - enemy.health <= 0) {
-                return { ...prev, over: true, paused: true, hp: 0 };
-              }
-              return { ...prev, hp: prev.hp - enemy.health };
-            });
-          } else if (enemy.destroied == "dead") {
-            setObjects((prev) => ({
-              ...prev,
-              effects: [...prev.effects, new Effect(enemy.x, enemy.y)],
-            }));
-            setGame((prev) => ({ ...prev, coins: prev.coins + 5 }));
-          }
-          enemies.splice(index, 1);
-        }
-      });
-
-      frameId = requestAnimationFrame(() => gameLoop(ctx));
-    }
-
-    frameId = requestAnimationFrame(() => gameLoop(ctx));
-
-    return () => cancelAnimationFrame(frameId);
+    requestAnimationFrame(() =>
+      gameLoop({ ctx, getGame, setGame, entry, waypoints })
+    );
   }, [game.paused]);
 
   // keyboard controls effect
   useEffect(() => {
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
-        setGame((prev) => ({ ...prev, paused: !prev.paused }));
+        const game = getGame();
+
+        setGame({ ...game, paused: !game.paused });
       }
     });
   }, []);
@@ -277,33 +103,30 @@ function App() {
     if (x >= 0 && x < ROWS_COUNT && y >= 0 && y < COLUMNS_COUNT) {
       const cell = cells.get(`${x},${y}`);
 
-      if (cell) hoveredCell.current = cell;
-      else hoveredCell.current = { x, y };
+      if (cell) setGame({ hoveredCell: cell });
+      else setGame({ hoveredCell: { x, y } });
     } else {
-      hoveredCell.current = null;
+      setGame({ hoveredCell: null });
     }
-
-    console.log(hoveredCell.current);
   };
 
   const handleMouseClick = () => {
+    const { hoveredCell, towers } = getGame();
+
     const towerCoins = 5;
 
-    if (
-      hoveredCell.current!.type == "path" ||
-      hoveredCell.current!.type == "something"
-    ) {
+    if (hoveredCell!.type == "path" || hoveredCell!.type == "something") {
       return;
     }
 
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
 
-    if (hoveredCell.current!.type == "tower") {
+    if (hoveredCell!.type == "tower") {
       if (game.coins < towerCoins) return;
 
       const t = towers.find(
-        (t) => t.x === hoveredCell.current!.x && t.y === hoveredCell.current!.y
+        (t) => t.x === hoveredCell!.x && t.y === hoveredCell!.y
       );
 
       if (!t) return;
@@ -322,26 +145,32 @@ function App() {
 
         cells.set(`${t.x},${t.y}`, newCell);
 
-        hoveredCell.current = newCell;
-
-        setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
+        const game = getGame();
+        setGame({
+          coins: game.coins - towerCoins,
+          hoveredCell: newCell,
+        });
       }
 
       return;
     }
 
     if (game.coins >= towerCoins) {
-      const { x, y } = hoveredCell.current!;
-      // towers.push(new Tower(ctx, x, y));
+      const { x, y } = hoveredCell!;
+      const game = getGame();
+
       towers.push(new MegaTower(x, y) as any);
-      hoveredCell.current = {
-        x,
-        y,
-        type: "tower",
-        level: 1,
-      };
-      cells.set(`${x},${y}`, hoveredCell.current);
-      setGame((prev) => ({ ...prev, coins: prev.coins - towerCoins }));
+
+      cells.set(`${x},${y}`, hoveredCell!);
+      setGame({
+        coins: game.coins - towerCoins,
+        hoveredCell: {
+          x,
+          y,
+          type: "tower",
+          level: 1,
+        },
+      });
     }
   };
 
@@ -363,7 +192,7 @@ function App() {
         <span>WAVE</span> {game.currentWave}
       </p>
       <section>
-        <OffscreenCanvas grid={grid} effects={objects.effects} />
+        <OffscreenCanvas grid={grid} />
         <canvas
           ref={canvas}
           width={CANVAS_WIDTH}
@@ -375,7 +204,7 @@ function App() {
       {game.over && (
         <div className="overlay">
           <p>Game over</p>
-          <button onClick={() => resetGame()}>Retry</button>
+          {/* <button onClick={() => resetGame()}>Retry</button> */}
         </div>
       )}
       {!game.over && game.paused && (

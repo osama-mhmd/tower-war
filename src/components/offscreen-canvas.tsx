@@ -1,20 +1,15 @@
 import { useEffect, useRef } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../config/constants";
 import drawGrid from "../utils/draw-grid";
-import Effect from "../objects/effect";
 import useCells from "../stores/cells";
 import throwRandomObjs from "../utils/throw-random-objs";
+import useGame from "@/stores/game";
 
-export default function OffscreenCanvas({
-  grid,
-  effects,
-}: {
-  grid: number[][];
-  effects: Effect[];
-}) {
+export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const currentEffectIndex = useRef<number>(0);
   const store = useCells();
+  const { game, getGame } = useGame();
 
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
@@ -54,11 +49,13 @@ export default function OffscreenCanvas({
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
 
+    const { effects } = getGame();
+
     for (let i = currentEffectIndex.current; i < effects.length; i++) {
       effects[i].draw(ctx);
       currentEffectIndex.current++;
     }
-  }, [effects]);
+  }, [game.effects]);
 
   return (
     <canvas

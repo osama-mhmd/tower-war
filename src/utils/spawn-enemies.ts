@@ -1,5 +1,5 @@
 import { Point } from "../types/global";
-import Enemy from "../objects/enemy";
+import { Enemy } from "@/entities/enemies";
 
 export default function spawnEnemies(
   ctx: CanvasRenderingContext2D,

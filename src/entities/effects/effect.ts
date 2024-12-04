@@ -1,4 +1,4 @@
-import { TILE_SIZE } from "../config/constants";
+import { TILE_SIZE } from "../../config/constants";
 
 export default class Effect {
   x: number;

@@ -1,5 +1,5 @@
-import { TILE_SIZE } from "../config/constants";
-import { Point } from "../types/global";
+import { TILE_SIZE } from "@/config/constants";
+import { Point } from "@/types/global";
 
 export default class Enemy {
   ctx: CanvasRenderingContext2D;
