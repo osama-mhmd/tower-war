@@ -12,3 +12,7 @@ export interface Point {
     | "corner-bottom-right"
     | "corner-bottom-left";
 }
+
+export interface Context extends CanvasRenderingContext2D {
+  draw: (url: string, x: number, y: number, size?: number = TILE_SIZE) => void;
+}

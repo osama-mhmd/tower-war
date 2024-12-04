@@ -10,18 +10,22 @@ import {
 } from "./config/constants";
 import generateGrid from "./utils/generate-grid";
 import { Coins, Heart, Skull } from "lucide-react";
-import Tower from "./objects/tower";
-import { Point } from "./types/global";
+// import Tower from "./objects/tower";
+import { Context, Point } from "./types/global";
 import { useToast } from "./components/toaster";
 import OffscreenCanvas from "./components/offscreen-canvas";
 import Effect from "./objects/effect";
 import hover from "./utils/hover";
 import useCells from "./stores/cells";
+// import { RocketTower } from "./objects/towers";
+// import DefenseEntity from "./objects/entities/defense-entity";
+import define from "./utils/define-ctx";
+import { Defense, RocketTower as MegaTower } from "./objects/defense";
 
 let frameId: number;
 
 const enemies: Enemy[] = [];
-const towers: Tower[] = [];
+const towers: Defense[] = [];
 
 interface Game {
   enemiesCount: number;
@@ -89,13 +93,23 @@ function App() {
     towers.splice(0, towers.length);
   }
 
+  // do once effect
   useEffect(() => {
     if (!canvas.current) return;
 
-    const ctx = canvas.current.getContext("2d");
+    const ctx = canvas.current.getContext("2d") as Context;
     if (!ctx) return;
 
-    function gameLoop(ctx: CanvasRenderingContext2D) {
+    define(ctx);
+  }, []);
+
+  useEffect(() => {
+    if (!canvas.current) return;
+
+    const ctx = canvas.current.getContext("2d") as Context;
+    if (!ctx) return;
+
+    function gameLoop(ctx: Context) {
       if (game.paused) return;
 
       // update time
@@ -105,8 +119,8 @@ function App() {
       const randomX = Math.floor(Math.random() * 100);
       switch (currentWave.current) {
         case 1:
-          if (randomX < 3) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.02, 5, waypoints));
+          if (randomX < 1) {
+            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.02, 1, waypoints));
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
 
@@ -161,7 +175,7 @@ function App() {
           break;
         case 4:
           if (randomX < 3) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 30, waypoints));
+            // enemies.push(new Enemy(ctx, entry.x, entry.y, 0.1, 30, waypoints));
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
 
@@ -180,15 +194,16 @@ function App() {
           break;
         case 5:
           if (randomX < 5) {
-            enemies.push(new Enemy(ctx, entry.x, entry.y, 0.15, 35, waypoints));
+            // enemies.push(new Enemy(ctx, entry.x, entry.y, 0.15, 35, waypoints));
             setGame((prev) => {
               const newCount = prev.enemiesCount + 1;
 
               if (newCount == 102) {
                 toast("CATCH ME IF YOU CAN 🤞");
-                enemies.push(
-                  new Enemy(ctx, entry.x, entry.y, 0.4, 35, waypoints)
-                );
+                enemies
+                  .push
+                  // new Enemy(ctx, entry.x, entry.y, 0.4, 35, waypoints)
+                  ();
               }
 
               return {
@@ -206,7 +221,7 @@ function App() {
       hover(ctx, hoveredCell.current);
 
       towers.forEach((tower) => tower.update(enemies, gameTime.current));
-      towers.forEach((tower) => tower.draw());
+      towers.forEach((tower) => tower.draw(ctx));
 
       enemies.forEach((enemy, index) => {
         enemy.update();
@@ -293,7 +308,8 @@ function App() {
 
       if (!t) return;
 
-      const result = t.upgrade();
+      // const result = t.upgrade();
+      const result = true;
 
       if (result) {
         const newCell: Point = {
@@ -316,7 +332,8 @@ function App() {
 
     if (game.coins >= towerCoins) {
       const { x, y } = hoveredCell.current!;
-      towers.push(new Tower(ctx, x, y));
+      // towers.push(new Tower(ctx, x, y));
+      towers.push(new MegaTower(x, y) as any);
       hoveredCell.current = {
         x,
         y,
