@@ -16,13 +16,22 @@ import define from "./utils/define-ctx";
 import gameLoop from "@/core/gameloop";
 import useGame from "./stores/game";
 import { MegaTower } from "@/entities/towers";
+import { Tower } from "@/types/towers";
+import { Enemy } from "./entities/enemies";
+
+const towers: Tower[] = [];
+const enemies: Enemy[] = [];
 
 function App() {
   const cells = useCells();
 
-  const { game, getGame, setGame } = useGame();
+  console.log("Rendered");
+
+  const { game, getGame, setGame, resetGame } = useGame();
 
   const canvas = useRef<HTMLCanvasElement>(null);
+
+  const hoveredCell = useRef<Point | null>(null);
 
   const { grid, waypoints } = useMemo(() => {
     const { grid, waypoints } = generateGrid(2);
@@ -38,22 +47,17 @@ function App() {
 
   const entry = useMemo(() => waypoints[0], [waypoints]);
 
-  // function resetGame(incTrial: boolean = true, incLevel = false) {
-  //   setGame(() => {
-  //     console.log(prev.trial + 1);
-  //     return {
-  //       ...defaultGame,
-  //       trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
-  //       level: incLevel ? prev.level + 1 : prev.level, // increase level
-  //     };
-  //   });
+  function reset(incTrial: boolean = true, incLevel = false) {
+    const prev = getGame();
 
-  //   currentWave.current = 1;
-  //   gameTime.current = 0;
+    resetGame({
+      trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
+      level: incLevel ? prev.level + 1 : prev.level, // increase level
+    });
 
-  //   enemies.splice(0, enemies.length);
-  //   towers.splice(0, towers.length);
-  // }
+    towers.splice(0, towers.length);
+    enemies.splice(0, enemies.length);
+  }
 
   // do once effect
   useEffect(() => {
@@ -71,10 +75,17 @@ function App() {
     const ctx = canvas.current.getContext("2d") as Context;
     if (!ctx) return;
 
-    gameLoop({ ctx, getGame, setGame, entry, waypoints });
-
     requestAnimationFrame(() =>
-      gameLoop({ ctx, getGame, setGame, entry, waypoints })
+      gameLoop({
+        ctx,
+        getGame,
+        setGame,
+        entry,
+        waypoints,
+        towers,
+        enemies,
+        hoveredCell,
+      })
     );
   }, [game.paused]);
 
@@ -82,9 +93,7 @@ function App() {
   useEffect(() => {
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
-        const game = getGame();
-
-        setGame({ ...game, paused: !game.paused });
+        setGame({ paused: !getGame().paused });
       }
     });
   }, []);
@@ -103,30 +112,33 @@ function App() {
     if (x >= 0 && x < ROWS_COUNT && y >= 0 && y < COLUMNS_COUNT) {
       const cell = cells.get(`${x},${y}`);
 
-      if (cell) setGame({ hoveredCell: cell });
-      else setGame({ hoveredCell: { x, y } });
+      if (cell) hoveredCell.current = cell;
+      else hoveredCell.current = { x, y };
     } else {
-      setGame({ hoveredCell: null });
+      hoveredCell.current = null;
     }
   };
 
   const handleMouseClick = () => {
-    const { hoveredCell, towers } = getGame();
+    const { coins } = getGame();
 
     const towerCoins = 5;
 
-    if (hoveredCell!.type == "path" || hoveredCell!.type == "something") {
+    if (
+      hoveredCell.current!.type == "path" ||
+      hoveredCell.current!.type == "something"
+    ) {
       return;
     }
 
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
 
-    if (hoveredCell!.type == "tower") {
-      if (game.coins < towerCoins) return;
+    if (hoveredCell.current!.type == "tower") {
+      if (coins < towerCoins) return;
 
       const t = towers.find(
-        (t) => t.x === hoveredCell!.x && t.y === hoveredCell!.y
+        (t) => t.x === hoveredCell.current!.x && t.y === hoveredCell.current!.y
       );
 
       if (!t) return;
@@ -146,37 +158,35 @@ function App() {
         cells.set(`${t.x},${t.y}`, newCell);
 
         const game = getGame();
-        setGame({
-          coins: game.coins - towerCoins,
-          hoveredCell: newCell,
-        });
+        setGame({ coins: game.coins - towerCoins });
+        hoveredCell.current = newCell;
       }
 
       return;
     }
 
-    if (game.coins >= towerCoins) {
-      const { x, y } = hoveredCell!;
+    if (coins >= towerCoins) {
+      const { x, y } = hoveredCell.current!;
       const game = getGame();
 
       towers.push(new MegaTower(x, y) as any);
 
-      cells.set(`${x},${y}`, hoveredCell!);
+      cells.set(`${x},${y}`, hoveredCell.current!);
       setGame({
         coins: game.coins - towerCoins,
-        hoveredCell: {
-          x,
-          y,
-          type: "tower",
-          level: 1,
-        },
       });
+      hoveredCell.current = {
+        x,
+        y,
+        type: "tower",
+        level: 1,
+      };
     }
   };
 
   return (
     <main>
-      <div className="logo" onClick={() => setGame({ ...game, paused: true })}>
+      <div className="logo" onClick={() => setGame({ paused: true })}>
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
       <p className="user-hp">
@@ -204,15 +214,13 @@ function App() {
       {game.over && (
         <div className="overlay">
           <p>Game over</p>
-          {/* <button onClick={() => resetGame()}>Retry</button> */}
+          <button onClick={() => reset()}>Retry</button>
         </div>
       )}
       {!game.over && game.paused && (
         <div className="overlay">
           <p>Paused</p>
-          <button onClick={() => setGame({ ...game, paused: false })}>
-            Continue
-          </button>
+          <button onClick={() => setGame({ paused: false })}>Continue</button>
         </div>
       )}
     </main>

@@ -18,7 +18,7 @@ export default class MegaTower implements Tower {
   level: number = 1;
   max: boolean = false;
   bullets: Bullet[] = [];
-  attackSpeed = 0.2;
+  attackSpeed = 1;
   cannon: Cannon;
 
   constructor(x: number, y: number) {
@@ -37,7 +37,7 @@ export default class MegaTower implements Tower {
       x: this.x,
       y: this.y,
       distance,
-      speed: 0.2,
+      speed: 0.1,
       angle,
       texture: "towerDefense_tile295",
     });

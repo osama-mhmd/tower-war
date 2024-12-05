@@ -4,7 +4,7 @@ import { Store } from "../stores/cells";
 
 export default function throwRandomObjs(
   ctx: CanvasRenderingContext2D,
-  { get, set }: Store,
+  { get, set }: { get: Store["get"]; set: Store["set"] },
   imgSrc: string,
   range: [number, number] = [2, 1],
   config?: {

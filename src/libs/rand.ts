@@ -9,6 +9,21 @@ const Rand = {
   randomDirection: function () {
     return this.rtlb[this.randomIntInRange(this.rtlb.length - 1)];
   },
+  throwEvent: function (percentage: number, fn: () => void) {
+    if (this.randomIntInRange(100) < percentage) {
+      fn();
+    }
+  },
+  throwEventInRange: function (
+    num: number,
+    range: [number, number],
+    percentage: number,
+    fn: () => void
+  ) {
+    if (num < range[0] || num > range[1]) return;
+
+    this.throwEvent(percentage, fn);
+  },
 };
 
 export default Rand;

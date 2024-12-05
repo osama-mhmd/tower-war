@@ -10,25 +10,25 @@ const defaultGame: Game = {
   coins: 10,
   level: 1,
   trial: 1,
-  effects: [],
-  towers: [],
-  enemies: [],
-  gameTime: 0,
-  hoveredCell: null,
+  // effects: [],
 };
+// hoveredCell: null,
 
 export interface GameStore {
   game: Game;
   setGame: (game: Partial<Game>) => void;
   getGame: () => Game;
-  resetGame: () => void;
+  resetGame: (game?: Partial<Game>) => void;
 }
 
 const useGame = create<GameStore>((set, get) => ({
   game: defaultGame,
   setGame: (game) => set({ game: { ...get().game, ...game } }),
   getGame: () => get().game,
-  resetGame: () => set({ game: defaultGame }),
+  resetGame: (game = {}) =>
+    set({
+      game: { ...defaultGame, ...game },
+    }),
 }));
 
 export default useGame;
