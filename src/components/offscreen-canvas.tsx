@@ -3,9 +3,14 @@ import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../config/constants";
 import drawGrid from "../utils/draw-grid";
 import useCells from "../stores/cells";
 import throwRandomObjs from "../utils/throw-random-objs";
+import useGame from "@/stores/game";
+
+let currentEffectIndex = 0;
 
 export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
   const store = useCells();
+
+  const effects = useGame().game.effects;
 
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -42,6 +47,18 @@ export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     };
   }, [grid]);
+
+  useEffect(() => {
+    const ctx = canvas.current?.getContext("2d");
+    if (!ctx) return;
+
+    if (effects.length == 0) currentEffectIndex = 0;
+
+    for (let i = currentEffectIndex; i < effects.length; i++) {
+      effects[i].draw(ctx);
+      currentEffectIndex++;
+    }
+  }, [effects]);
 
   return (
     <canvas

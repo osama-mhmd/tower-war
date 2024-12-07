@@ -54,22 +54,20 @@ section {
 .logo:hover img {
   transform: scale(1.1);
 }
-.enemies-count,
-.user-hp,
-.coins-count {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.status {
   position: absolute;
   right: 1rem;
   top: 1rem;
-  font-size: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
-.enemies-count {
-  top: 3rem;
-}
-.coins-count {
-  top: 5rem;
+.status > p {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.5rem;
 }
 .offscreen-canvas {
   position: absolute;

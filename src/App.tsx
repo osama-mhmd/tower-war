@@ -21,6 +21,7 @@ import { Enemy } from "./entities/enemies";
 import Start from "./components/start";
 import useSound from "use-sound";
 import { cn } from "./utils";
+// import SettingsTrigger from "./components/settings-trigger";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
@@ -145,7 +146,7 @@ function App() {
   const handleMouseClick = () => {
     const { coins } = getGame();
 
-    const towerCoins = 5;
+    const cost = avaliableTowers.find((el) => el.name == tower)?.cost ?? 0;
 
     if (
       hoveredCell.current!.type == "path" ||
@@ -158,46 +159,44 @@ function App() {
     if (!ctx) return;
 
     if (hoveredCell.current!.type == "tower") {
-      if (coins < towerCoins) return;
-
-      const t = towers.find(
-        (t) => t.x === hoveredCell.current!.x && t.y === hoveredCell.current!.y
-      );
-
-      if (!t) return;
-
-      // const result = t.upgrade();
-      const result = true;
-
-      if (result) {
-        const newCell: Point = {
-          x: t.x,
-          y: t.y,
-          type: "tower",
-          level: t.level,
-          max: t.max,
-        };
-
-        cells.set(`${t.x},${t.y}`, newCell);
-
-        const game = getGame();
-        setGame({ coins: game.coins - towerCoins });
-        hoveredCell.current = newCell;
-      }
-
       return;
+
+      // if (coins < cost) return;
+
+      // const t = towers.find(
+      //   (t) => t.x === hoveredCell.current!.x && t.y === hoveredCell.current!.y
+      // );
+
+      // if (!t) return;
+
+      // // const result = t.upgrade();
+      // const result = true;
+
+      // if (result) {
+      //   const newCell: Point = {
+      //     x: t.x,
+      //     y: t.y,
+      //     type: "tower",
+      //     level: t.level,
+      //     max: t.max,
+      //   };
+
+      //   cells.set(`${t.x},${t.y}`, newCell);
+
+      //   const game = getGame();
+      //   setGame({ coins: game.coins - cost });
+      //   hoveredCell.current = newCell;
+      // }
+
+      // return;
     }
 
-    if (coins >= towerCoins) {
+    if (coins >= cost) {
       const { x, y } = hoveredCell.current!;
       const game = getGame();
 
       if (tower == "mega") towers.push(new MegaTower(x, y));
       if (tower == "rocket") towers.push(new RocketTower(x, y));
-
-      cells.set(`${x},${y}`, hoveredCell.current!);
-
-      const cost = avaliableTowers.find((el) => el.name == tower)?.cost ?? 0;
 
       setGame({ coins: game.coins - cost });
 
@@ -207,6 +206,8 @@ function App() {
         type: "tower",
         level: 1,
       };
+
+      cells.set(`${x},${y}`, hoveredCell.current!);
     }
   };
 
@@ -221,15 +222,18 @@ function App() {
       >
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
-      <p className="user-hp">
-        {game.hp} <Heart fill="red" stroke="#d30" />
-      </p>
-      <p className="enemies-count">
-        {game.enemiesCount} <Skull fill="#000" stroke="#FF4500" />
-      </p>
-      <p className="coins-count">
-        {game.coins} <Coins fill="#000" stroke="#45FF00" />
-      </p>
+      <div className="status">
+        {/* <SettingsTrigger onClick={() => setGame({ paused: true })} /> */}
+        <p>
+          {game.hp} <Heart fill="red" stroke="#d30" />
+        </p>
+        <p>
+          {game.enemiesCount} <Skull fill="#000" stroke="#FF4500" />
+        </p>
+        <p>
+          {game.coins} <Coins fill="#000" stroke="#45FF00" />
+        </p>
+      </div>
       <p className="wave-number">
         <span>WAVE</span> {game.currentWave}
       </p>

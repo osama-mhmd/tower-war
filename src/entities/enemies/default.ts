@@ -1,4 +1,5 @@
 import { TILE_SIZE } from "@/config/constants";
+import { calculateAngle } from "@/helpers";
 import { Point } from "@/types/global";
 
 export default class Enemy {
@@ -10,6 +11,7 @@ export default class Enemy {
   currentWaypointIndex: number;
   waypoints: Point[];
   destroied: "none" | "entered" | "dead";
+  angle = 0;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -44,6 +46,11 @@ export default class Enemy {
     const dy = waypoint.y - this.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
+    this.angle = calculateAngle({ x: this.x, y: this.y }, {
+      x: waypoint.x,
+      y: waypoint.y,
+    } as any);
+
     if (distance < this.speed) {
       this.currentWaypointIndex++;
     } else {
@@ -53,13 +60,20 @@ export default class Enemy {
   }
 
   draw() {
-    this.ctx.fillStyle = "red";
-
-    const size = TILE_SIZE / 2;
+    const size = TILE_SIZE;
     const left = this.x * TILE_SIZE;
     const top = this.y * TILE_SIZE;
-    const offset = TILE_SIZE / 4;
+    const offset = TILE_SIZE / 2;
 
-    this.ctx.fillRect(left + offset, top + offset, size, size);
+    const img = new Image();
+    img.src = "/textures/towerDefense_tile245.png";
+
+    this.ctx.save();
+    this.ctx.translate(left + offset, top + offset);
+    this.ctx.rotate(this.angle);
+
+    this.ctx.drawImage(img, -offset, -offset, size, size);
+
+    this.ctx.restore();
   }
 }

@@ -10,7 +10,7 @@ const defaultGame: Game = {
   coins: 10,
   level: 1,
   trial: 1,
-  // effects: [],
+  effects: [],
 };
 // hoveredCell: null,
 

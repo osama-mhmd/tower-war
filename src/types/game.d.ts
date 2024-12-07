@@ -13,5 +13,5 @@ export default interface Game {
   level: number; // Y
   trial: number; // Y
   currentWave: number; // Y
+  effects: Effect[]; // Y
 }
-// effects: Effect[]; // Y

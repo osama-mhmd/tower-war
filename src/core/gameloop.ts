@@ -20,7 +20,7 @@ interface GameLoop {
 }
 
 let gameTime = 0;
-let currentEffectIndex = 0;
+// let currentEffectIndex = 0;
 
 const effects: Effect[] = [];
 
@@ -73,18 +73,12 @@ export default function gameLoop({
       } else if (enemy.destroied == "dead") {
         setGame({
           coins: coins + 5,
+          effects: [...getGame().effects, new Effect(enemy.x, enemy.y)],
         });
-        effects.push(new Effect(enemy.x, enemy.y));
       }
       enemies.splice(index, 1);
     }
   });
-
-  // draw effects
-  for (let i = currentEffectIndex; i < effects.length; i++) {
-    effects[i].draw(ctx);
-    currentEffectIndex++;
-  }
 
   // loop
   requestAnimationFrame(() =>
