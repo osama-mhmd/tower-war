@@ -63,6 +63,7 @@ section {
   position: absolute;
   right: 1rem;
   top: 1rem;
+  font-size: 1.25rem;
 }
 .enemies-count {
   top: 3rem;
@@ -91,4 +92,38 @@ section {
 .wave-number span {
   letter-spacing: 0.75ch;
   margin-inline-end: 0.5rem;
+}
+.towers {
+  position: absolute;
+  left: 1rem;
+  top: 10rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  line-height: 0;
+}
+.towers > div {
+  padding: 0.25rem;
+  background-color: #333;
+  border: 4px solid #333;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  position: relative;
+}
+.towers > div.active {
+  border-color: blue;
+}
+.towers > div.cannot-purchase {
+  filter: grayscale(0.5);
+}
+.towers > div > img {
+  width: 100px;
+}
+.towers > div > span {
+  font-size: 1.5rem;
+  position: absolute;
+  display: block;
+  bottom: 0.25rem;
+  right: 0.25rem;
+  line-height: 1;
 }

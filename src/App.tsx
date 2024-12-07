@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import {
   CANVAS_HEIGHT,
@@ -15,9 +15,12 @@ import useCells from "./stores/cells";
 import define from "./utils/define-ctx";
 import gameLoop from "@/core/gameloop";
 import useGame from "./stores/game";
-import { MegaTower } from "@/entities/towers";
+import { MegaTower, RocketTower } from "@/entities/towers";
 import { Tower } from "@/types/towers";
 import { Enemy } from "./entities/enemies";
+import Start from "./components/start";
+import useSound from "use-sound";
+import { cn } from "./utils";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
@@ -25,11 +28,20 @@ const enemies: Enemy[] = [];
 function App() {
   const cells = useCells();
 
-  console.log("Rendered");
-
   const { game, getGame, setGame, resetGame } = useGame();
 
+  const [start, setStart] = useState(false);
+  // const [play] = useSound("/sounds/metal-hit-woosh.wav", {
+  //   volume: 0.5,
+  //   onload: () => {
+  //     setStart(true);
+  //   },
+  // });
+  const [mouseClick] = useSound("/sounds/mouse-click-2.wav", { volume: 0.4 });
+  const [mouseClick2] = useSound("/sounds/mouse-click.wav", { volume: 0.4 });
+
   const canvas = useRef<HTMLCanvasElement>(null);
+  const [tower, setTower] = useState("mega");
 
   const hoveredCell = useRef<Point | null>(null);
 
@@ -67,7 +79,18 @@ function App() {
     if (!ctx) return;
 
     define(ctx);
+
+    setStart(true);
+    setTimeout(() => setStart(false), 1400);
   }, []);
+
+  useEffect(() => {
+    if (game.over) {
+      const warDrum = new Audio();
+      warDrum.src = "/sounds/drums-of-war.wav";
+      warDrum.play();
+    }
+  }, [game.over]);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -169,12 +192,15 @@ function App() {
       const { x, y } = hoveredCell.current!;
       const game = getGame();
 
-      towers.push(new MegaTower(x, y) as any);
+      if (tower == "mega") towers.push(new MegaTower(x, y));
+      if (tower == "rocket") towers.push(new RocketTower(x, y));
 
       cells.set(`${x},${y}`, hoveredCell.current!);
-      setGame({
-        coins: game.coins - towerCoins,
-      });
+
+      const cost = avaliableTowers.find((el) => el.name == tower)?.cost ?? 0;
+
+      setGame({ coins: game.coins - cost });
+
       hoveredCell.current = {
         x,
         y,
@@ -186,7 +212,13 @@ function App() {
 
   return (
     <main>
-      <div className="logo" onClick={() => setGame({ paused: true })}>
+      <div
+        className="logo"
+        onClick={() => {
+          mouseClick();
+          setGame({ paused: true });
+        }}
+      >
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
       <p className="user-hp">
@@ -211,20 +243,67 @@ function App() {
           onClick={handleMouseClick}
         ></canvas>
       </section>
+      <div className="towers">
+        {avaliableTowers.map((t) => {
+          return (
+            <div
+              key={t.name}
+              onClick={() => {
+                if (game.coins >= t.cost && tower !== t.name) {
+                  setTower(t.name);
+                  mouseClick2();
+                }
+              }}
+              className={cn(
+                t.name == tower ? "active" : "",
+                game.coins >= t.cost ? "" : "cannot-purchase"
+              )}
+            >
+              <img
+                alt={t.name}
+                draggable={false}
+                src={`/textures/${t.tileSrc}.png`}
+              />
+              <span>{t.cost}</span>
+            </div>
+          );
+        })}
+      </div>
       {game.over && (
         <div className="overlay">
           <p>Game over</p>
-          <button onClick={() => reset()}>Retry</button>
+          <button
+            onClick={() => {
+              mouseClick();
+              reset();
+            }}
+          >
+            Retry
+          </button>
         </div>
       )}
       {!game.over && game.paused && (
         <div className="overlay">
           <p>Paused</p>
-          <button onClick={() => setGame({ paused: false })}>Continue</button>
+          <button
+            onClick={() => {
+              mouseClick();
+              setGame({ paused: false });
+            }}
+          >
+            Continue
+          </button>
         </div>
       )}
+
+      {start && <Start />}
     </main>
   );
 }
+
+const avaliableTowers = [
+  { name: "mega", tileSrc: "towerDefense_tile249", cost: 5 },
+  { name: "rocket", tileSrc: "towerDefense_tile206", cost: 15 },
+];
 
 export default App;
