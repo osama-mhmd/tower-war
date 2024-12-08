@@ -1,4 +1,4 @@
-// import Solider from "./solider";
+import Solider from "./solider";
 import Tank from "./tank";
 
-export { Tank as Solider };
+export { Tank, Solider };

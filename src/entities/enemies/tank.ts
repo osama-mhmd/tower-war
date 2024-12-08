@@ -5,6 +5,18 @@ import { AggressiveEnemy } from "@/types/enemies";
 import { Cannon } from "../towers/sub/cannon";
 import { Tower } from "@/types/towers";
 import { State } from "@/types/entities";
+import Rand from "@/libs/rand";
+
+const textures: { [key: string]: { base: string; cannon: string } } = {
+  green: {
+    base: "towerDefense_tile268",
+    cannon: "towerDefense_tile291",
+  },
+  white: {
+    base: "towerDefense_tile269",
+    cannon: "towerDefense_tile292",
+  },
+};
 
 export default class Tank implements AggressiveEnemy {
   x: number;
@@ -14,14 +26,17 @@ export default class Tank implements AggressiveEnemy {
   currentWaypointIndex: number;
   waypoints: Point[];
   state: State;
-  angle = 0;
-  aggressive: true = true;
+  damage: number;
   cannon: Cannon;
+  texture: string;
+
+  // constants
+  aggressive: true = true;
+  angle = 0;
   lastShot = 0;
   attackSpeed = 1;
   minRange = 0;
-  maxRange = 3;
-  damage = 4;
+  maxRange = 2;
   prize = 8;
 
   constructor(
@@ -29,7 +44,8 @@ export default class Tank implements AggressiveEnemy {
     y: number,
     speed: number,
     health: number,
-    waypoints: Point[]
+    waypoints: Point[],
+    damage = 4
   ) {
     this.x = x;
     this.y = y;
@@ -37,11 +53,15 @@ export default class Tank implements AggressiveEnemy {
     this.health = health;
     this.currentWaypointIndex = 0;
     this.waypoints = waypoints;
+    this.damage = damage;
+
     this.state = "alive";
+    const style = Rand.randomChoice(["white", "green"]);
+    this.texture = textures[style].base;
     this.cannon = new Cannon({
       x: this.x,
       y: this.y,
-      texture: "towerDefense_tile291",
+      texture: textures[style].cannon,
       angleOffset: 0,
       offsetX: (-1 * TILE_SIZE) / 10,
     });
@@ -103,7 +123,7 @@ export default class Tank implements AggressiveEnemy {
     const offset = TILE_SIZE / 2;
 
     const img = new Image();
-    img.src = "/textures/towerDefense_tile268.png";
+    img.src = `/textures/${this.texture}.png`;
 
     ctx.save();
     ctx.translate(left, top);
