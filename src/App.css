@@ -125,3 +125,35 @@ section {
   right: 0.25rem;
   line-height: 1;
 }
+.settings {
+  z-index: 20;
+}
+.settings-trigger {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
+.settings > div {
+  background-color: white;
+  color: black;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+}
+.settings > div > :first-child {
+  margin: 0;
+}
+.settings .field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.settings > div > div:last-child {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}

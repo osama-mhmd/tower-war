@@ -21,7 +21,7 @@ import Enemy from "@/types/enemies";
 import Start from "./components/start";
 import useSound from "use-sound";
 import { cn } from "./utils";
-// import SettingsTrigger from "./components/settings-trigger";
+import SettingsTrigger from "./components/settings-trigger";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
@@ -223,8 +223,13 @@ function App() {
       >
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
+      <SettingsTrigger
+        onClick={() => {
+          mouseClick();
+          setGame({ paused: true });
+        }}
+      />
       <div className="status">
-        {/* <SettingsTrigger onClick={() => setGame({ paused: true })} /> */}
         <p>
           {game.hp} <Heart fill="red" stroke="#d30" />
         </p>

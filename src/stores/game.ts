@@ -11,8 +11,10 @@ const defaultGame: Game = {
   level: 1,
   trial: 1,
   effects: [],
+  settings: {
+    effectsVolume: 0.5,
+  },
 };
-// hoveredCell: null,
 
 export interface GameStore {
   game: Game;
