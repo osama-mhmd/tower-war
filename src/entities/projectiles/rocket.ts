@@ -1,7 +1,7 @@
 import { TILE_SIZE } from "@/config/constants";
 import { calculateAngle } from "@/helpers";
 import { Bullet, RocketConfig } from "@/types/bullets";
-import { Enemy } from "../enemies";
+import Enemy from "@/types/enemies";
 
 export default class Rocket implements Bullet {
   x: number;
@@ -35,6 +35,13 @@ export default class Rocket implements Bullet {
     this.offsetX = offsetX ?? -TILE_SIZE / 2;
     this.offsetY = offsetY ?? -TILE_SIZE / 2;
     this.texture = texture;
+
+    // handling expectedHealth
+    if (target) {
+      if (this.target!.expecetedHealth)
+        this.target!.expecetedHealth -= this.damage;
+      else this.target!.expecetedHealth = this.target!.health - this.damage;
+    }
   }
 
   update() {
@@ -50,6 +57,7 @@ export default class Rocket implements Bullet {
     if (this.now >= distance) {
       this.isDestroyed = true;
       this.target.health -= this.damage;
+
       return;
     }
     this.angle = calculateAngle(this, this.target);

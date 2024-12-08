@@ -17,7 +17,7 @@ import gameLoop from "@/core/gameloop";
 import useGame from "./stores/game";
 import { MegaTower, RocketTower } from "@/entities/towers";
 import { Tower } from "@/types/towers";
-import { Enemy } from "./entities/enemies";
+import Enemy from "@/types/enemies";
 import Start from "./components/start";
 import useSound from "use-sound";
 import { cn } from "./utils";
@@ -109,6 +109,7 @@ function App() {
         towers,
         enemies,
         hoveredCell,
+        setCells: cells.set,
       })
     );
   }, [game.paused]);

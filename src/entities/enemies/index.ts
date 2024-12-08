@@ -1,3 +1,4 @@
-import Enemy from "./default";
+// import Solider from "./solider";
+import Tank from "./tank";
 
-export { Enemy };
+export { Tank as Solider };

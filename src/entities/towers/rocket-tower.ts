@@ -1,10 +1,11 @@
-import { selectNearnestEnemy } from "@/helpers";
-import { Enemy } from "../enemies";
+import { selectInRangeEntity } from "@/helpers";
+import Enemy from "@/types/enemies";
 import { Cannon } from "./sub/cannon";
 import { Rocket } from "../projectiles";
 import { Context } from "@/types/global";
 import { Tower } from "@/types/towers";
 import { Bullet } from "@/types/bullets";
+import { Entity, State } from "@/types/entities";
 
 export default class RocketTower implements Tower {
   x: number;
@@ -20,6 +21,8 @@ export default class RocketTower implements Tower {
   attackSpeed = 0.3;
   cannon: Cannon;
   canFire = true;
+  health = 20;
+  state: State = "alive";
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -31,7 +34,7 @@ export default class RocketTower implements Tower {
     });
   }
 
-  fire(target: Enemy) {
+  fire(target: Entity) {
     const sound = new Audio();
     sound.src = "/sounds/rocket-launch.wav";
     sound.play();
@@ -50,6 +53,11 @@ export default class RocketTower implements Tower {
     this.bullets.forEach((rocket) => rocket.update());
     this.bullets = this.bullets.filter((rocket) => !rocket.isDestroyed);
 
+    if (this.health <= 0) {
+      this.state = "lost";
+      return;
+    }
+
     if (
       gameTime - this.lastShot <= 60 / this.attackSpeed &&
       this.lastShot > 0
@@ -60,7 +68,7 @@ export default class RocketTower implements Tower {
       this.canFire = true;
     }
 
-    const { target } = selectNearnestEnemy(
+    const { target } = selectInRangeEntity(
       enemies,
       this.x,
       this.y,

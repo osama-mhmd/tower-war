@@ -1,7 +1,6 @@
 import { calculateAngle } from "@/helpers";
 import { TILE_SIZE } from "@/config/constants";
 import { Context } from "@/types/global";
-import { Enemy } from "@/entities/enemies";
 
 export interface CannonConfig {
   x: number;
@@ -13,6 +12,7 @@ export interface CannonConfig {
   offsetX?: number;
   offsetY?: number;
   texture: string;
+  angleOffset?: number;
 }
 
 export class Cannon {
@@ -23,18 +23,28 @@ export class Cannon {
   size: number;
   angle = 0;
   texture: string;
+  angleOffset: number;
 
-  constructor({ x, y, size, texture, offsetX, offsetY }: CannonConfig) {
+  constructor({
+    x,
+    y,
+    size,
+    texture,
+    offsetX,
+    offsetY,
+    angleOffset,
+  }: CannonConfig) {
     this.x = x;
     this.y = y;
     this.size = size ?? TILE_SIZE;
     this.texture = texture;
     this.offsetX = offsetX ?? 0;
     this.offsetY = offsetY ?? 0;
+    this.angleOffset = angleOffset ?? 1.5708; // 1.5708rad = 90deg
   }
 
-  update(target: Enemy) {
-    this.angle = calculateAngle(this as any, target);
+  update(target: { x: number; y: number }) {
+    this.angle = calculateAngle(this, target);
 
     return this.angle;
   }
@@ -44,12 +54,17 @@ export class Cannon {
 
     ctx.save();
     ctx.translate((this.x + 1 / 2) * TILE_SIZE, (this.y + 1 / 2) * TILE_SIZE);
-    ctx.rotate(this.angle + 1.5708); // 1.5708rad = 90deg
+    ctx.rotate(this.angle + this.angleOffset);
 
     const t = new Image(64, 64);
     t.src = `/textures/${this.texture}.png`;
-    const offsetX = this.offsetX; // size / 6;
-    ctx.drawImage(t, -size / 2, -size / 2 - offsetX, size, size);
+    ctx.drawImage(
+      t,
+      -size / 2 - this.offsetX,
+      -size / 2 - this.offsetY,
+      size,
+      size
+    );
 
     ctx.restore();
   }

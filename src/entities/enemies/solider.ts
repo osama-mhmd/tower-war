@@ -1,43 +1,41 @@
 import { TILE_SIZE } from "@/config/constants";
 import { calculateAngle } from "@/helpers";
-import { Point } from "@/types/global";
+import { Context, Point } from "@/types/global";
+import Enemy from "@/types/enemies";
 
-export default class Enemy {
-  ctx: CanvasRenderingContext2D;
+export default class Solider implements Enemy {
   x: number;
   y: number;
   speed: number;
   health: number;
   currentWaypointIndex: number;
   waypoints: Point[];
-  destroied: "none" | "entered" | "dead";
+  state: Enemy["state"];
   angle = 0;
 
   constructor(
-    ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
     speed: number,
     health: number,
     waypoints: Point[]
   ) {
-    this.ctx = ctx;
     this.x = x;
     this.y = y;
     this.speed = speed;
     this.health = health;
     this.currentWaypointIndex = 0;
     this.waypoints = waypoints;
-    this.destroied = "none";
+    this.state = "alive";
   }
 
   update() {
     if (this.health <= 0) {
-      this.destroied = "dead";
+      this.state = "lost";
       return;
     }
     if (this.currentWaypointIndex >= this.waypoints.length) {
-      this.destroied = "entered";
+      this.state = "won";
       return;
     } // Reached the end
 
@@ -59,7 +57,7 @@ export default class Enemy {
     }
   }
 
-  draw() {
+  draw(ctx: Context) {
     const size = TILE_SIZE;
     const left = this.x * TILE_SIZE;
     const top = this.y * TILE_SIZE;
@@ -68,12 +66,12 @@ export default class Enemy {
     const img = new Image();
     img.src = "/textures/towerDefense_tile245.png";
 
-    this.ctx.save();
-    this.ctx.translate(left + offset, top + offset);
-    this.ctx.rotate(this.angle);
+    ctx.save();
+    ctx.translate(left + offset, top + offset);
+    ctx.rotate(this.angle);
 
-    this.ctx.drawImage(img, -offset, -offset, size, size);
+    ctx.drawImage(img, -offset, -offset, size, size);
 
-    this.ctx.restore();
+    ctx.restore();
   }
 }

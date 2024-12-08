@@ -1,10 +1,10 @@
-import { Enemy } from "@/entities/enemies";
+import { Solider } from "@/entities/enemies";
+import Enemy from "@/types/enemies";
 import Rand from "@/libs/rand";
 import { GameStore } from "@/stores/game";
-import { Context, Point } from "@/types/global";
+import { Point } from "@/types/global";
 
 export default function spawnEnemies(
-  ctx: Context,
   get: GameStore["getGame"],
   set: GameStore["setGame"],
   entry: Point,
@@ -14,7 +14,7 @@ export default function spawnEnemies(
   const { currentWave } = get();
 
   const randy = (speed: number, health: number) => {
-    enemies.push(new Enemy(ctx, entry.x, entry.y, speed, health, waypoints));
+    enemies.push(new Solider(entry.x, entry.y, speed, health, waypoints));
 
     set({ enemiesCount: get().enemiesCount + 1 });
 

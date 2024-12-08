@@ -4,9 +4,10 @@ import { GameStore } from "@/stores/game";
 import { Context, Point } from "@/types/global";
 import hover from "@/utils/hover";
 import spawnEnemies from "./wave-and-enemies";
-import { Enemy } from "@/entities/enemies";
+import Enemy from "@/types/enemies";
 import { Tower } from "@/types/towers";
 import { MutableRefObject } from "react";
+import { Store } from "@/stores/cells";
 
 interface GameLoop {
   ctx: Context;
@@ -17,12 +18,10 @@ interface GameLoop {
   towers: Tower[];
   enemies: Enemy[];
   hoveredCell: MutableRefObject<Point | null>;
+  setCells: Store["set"];
 }
 
 let gameTime = 0;
-// let currentEffectIndex = 0;
-
-const effects: Effect[] = [];
 
 export default function gameLoop({
   ctx,
@@ -33,6 +32,7 @@ export default function gameLoop({
   towers,
   enemies,
   hoveredCell,
+  setCells,
 }: GameLoop) {
   const { paused } = getGame();
 
@@ -42,7 +42,7 @@ export default function gameLoop({
   gameTime++;
 
   // spawn enemies
-  spawnEnemies(ctx, getGame, setGame, entry, waypoints, enemies);
+  spawnEnemies(getGame, setGame, entry, waypoints, enemies);
 
   // reset canvas
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -51,18 +51,25 @@ export default function gameLoop({
   hover(ctx, hoveredCell.current);
 
   // handle towers
-  towers.forEach((tower) => tower.update(enemies, gameTime));
-  towers.forEach((tower) => tower.draw(ctx));
+  towers.forEach((tower, index) => {
+    tower.update(enemies, gameTime);
+    tower.draw(ctx);
+
+    if (tower.state == "lost") {
+      setCells(`${tower.x},${tower.y}`, { x: tower.x, y: tower.y });
+      towers.splice(index, 1);
+    }
+  });
 
   // handle enemies
   enemies.forEach((enemy, index) => {
-    enemy.update();
-    enemy.draw();
+    enemy.update(towers, gameTime);
+    enemy.draw(ctx);
 
-    if (enemy.destroied !== "none") {
+    if (enemy.state !== "alive") {
       const { hp, coins } = getGame();
 
-      if (enemy.destroied == "entered") {
+      if (enemy.state == "won") {
         const isDead = hp - enemy.health <= 0;
 
         setGame({
@@ -70,9 +77,9 @@ export default function gameLoop({
           paused: isDead,
           hp: isDead ? 0 : hp - enemy.health,
         });
-      } else if (enemy.destroied == "dead") {
+      } else if (enemy.state == "lost") {
         setGame({
-          coins: coins + 5,
+          coins: coins + (enemy.prize ?? 5),
           effects: [...getGame().effects, new Effect(enemy.x, enemy.y)],
         });
       }
@@ -91,6 +98,7 @@ export default function gameLoop({
       towers,
       enemies,
       hoveredCell,
+      setCells,
     })
   );
 }

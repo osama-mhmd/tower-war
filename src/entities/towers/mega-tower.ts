@@ -2,10 +2,11 @@ import { TILE_SIZE } from "@/config/constants";
 import { Context } from "@/types/global";
 import { Fire } from "../projectiles";
 import { Bullet } from "@/types/bullets";
-import { selectNearnestEnemy } from "@/helpers";
-import { Enemy } from "../enemies";
+import { selectInRangeEntity } from "@/helpers";
+import Enemy from "@/types/enemies";
 import { Cannon } from "./sub/cannon";
 import { Tower } from "@/types/towers";
+import { State } from "@/types/entities";
 
 export default class MegaTower implements Tower {
   x: number;
@@ -14,12 +15,14 @@ export default class MegaTower implements Tower {
   minRange: number = 0;
   maxRange: number = 3;
   angle: number = 0;
-  damage: number = 2;
+  damage: number = 3;
   level: number = 1;
   max: boolean = false;
   bullets: Bullet[] = [];
   attackSpeed = 1;
   cannon: Cannon;
+  health = 30;
+  state: State = "alive";
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -27,7 +30,7 @@ export default class MegaTower implements Tower {
     this.cannon = new Cannon({
       x: this.x,
       y: this.y,
-      offsetX: TILE_SIZE / 6,
+      offsetY: TILE_SIZE / 6,
       texture: "towerDefense_tile249",
     });
   }
@@ -49,15 +52,21 @@ export default class MegaTower implements Tower {
     this.bullets.forEach((bullet) => bullet.update());
     this.bullets = this.bullets.filter((bullet) => !bullet.isDestroyed);
 
+    if (this.health <= 0) {
+      this.state = "lost";
+      return;
+    }
+
     if (gameTime - this.lastShot <= 60 / this.attackSpeed && this.lastShot > 0)
       return;
 
-    const { distance, target } = selectNearnestEnemy(
+    const { distance, target } = selectInRangeEntity(
       enemies,
       this.x,
       this.y,
       this.minRange,
-      this.maxRange
+      this.maxRange,
+      true
     );
 
     if (target) {
