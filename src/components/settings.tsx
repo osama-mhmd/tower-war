@@ -1,11 +1,14 @@
 import useGame from "@/stores/game";
 import { useRef } from "react";
+import useSound from "use-sound";
 
 export default function Settings({ stater }: { stater(agr0: boolean): void }) {
   const effectsVolume = useRef<HTMLInputElement>(null);
   const { getGame, setGame } = useGame();
+  const [play] = useSound("/sounds/mouse-click-2.wav", { volume: 0.4 });
 
   function save() {
+    play();
     setGame({
       paused: false,
       settings: { effectsVolume: +effectsVolume.current!.value / 100 },
@@ -15,6 +18,7 @@ export default function Settings({ stater }: { stater(agr0: boolean): void }) {
   }
 
   function cancel() {
+    play();
     setGame({ paused: false });
 
     stater(false);

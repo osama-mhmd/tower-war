@@ -280,26 +280,28 @@ function App() {
         })}
       </div>
       {game.over && (
-        <div className="overlay">
+        <div className="overlay text-2xl">
           <p>Game over</p>
           <button
             onClick={() => {
               mouseClick();
               reset();
             }}
+            className="text-lg"
           >
             Retry
           </button>
         </div>
       )}
       {!game.over && game.paused && (
-        <div className="overlay">
+        <div className="overlay text-2xl">
           <p>Paused</p>
           <button
             onClick={() => {
               mouseClick();
               setGame({ paused: false });
             }}
+            className="text-lg"
           >
             Continue
           </button>
