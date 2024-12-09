@@ -240,7 +240,7 @@ function App() {
           {game.coins} <Coins fill="#000" stroke="#45FF00" />
         </p>
       </div>
-      <p className="wave-number">
+      <p key={game.currentWave} className="wave-number">
         <span>WAVE</span> {game.currentWave}
       </p>
       <section>
@@ -249,6 +249,7 @@ function App() {
           ref={canvas}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
+          className="main-canvas"
           onMouseMove={handleMouseMove}
           onClick={handleMouseClick}
         ></canvas>

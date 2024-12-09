@@ -25,7 +25,7 @@ export interface GameStore {
 
 const useGame = create<GameStore>((set, get) => ({
   game: defaultGame,
-  setGame: (game) => set({ game: { ...get().game, ...game } }),
+  setGame: (game) => set((prev) => ({ game: { ...prev.game, ...game } })),
   getGame: () => get().game,
   resetGame: (game = {}) =>
     set({

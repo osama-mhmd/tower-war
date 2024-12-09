@@ -10,7 +10,6 @@ export default function SettingsTrigger({
   const [settings, setSettings] = useState(false);
 
   const effect = {
-    marginBottom: "0.5rem",
     transform: hovered ? "rotateZ(45deg)" : "rotateZ(0)",
     transition: "300ms all",
     cursor: "pointer",
