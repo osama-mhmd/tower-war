@@ -240,7 +240,13 @@ function App() {
           {game.coins} <Coins fill="#000" stroke="#45FF00" />
         </p>
       </div>
-      <p key={game.currentWave} className="wave-number">
+      <p
+        key={game.currentWave}
+        style={{
+          animationPlayState: game.paused ? "paused" : "running",
+        }}
+        className="wave-number"
+      >
         <span>WAVE</span> {game.currentWave}
       </p>
       <section>
