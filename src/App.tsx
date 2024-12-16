@@ -123,6 +123,13 @@ function App() {
     });
   }, []);
 
+  const [success] = useSound("/sounds/success-notification.wav");
+
+  // TODO: Handle pausing the game while the timeout to trigger sound is still perparing
+  useEffect(() => {
+    setTimeout(() => success(), 1500);
+  }, [game.currentWave]);
+
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const cv = canvas.current;
     if (!cv) return;

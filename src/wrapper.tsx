@@ -10,9 +10,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 
   useEffect(() => {
-    // const promises = Object.entries(images).map(([key]: [string, unknown]) =>
-    //   loadImage(key.replace("/public/textures/", ""))
-    // );
+    // if ("serviceWorker" in navigator) {
+    //   navigator.serviceWorker.register("./sw3.js");
+    // }
+
     const promises = images.map((src) => loadImage(src));
 
     Promise.all(promises)
