@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import images from "./config/resources.json";
+import images from "@/config/images.json";
 
 // `glob` makes a very bad white screen at the first load
 // const images = import.meta.glob("/public/textures/*.png", { eager: true });
@@ -10,21 +10,18 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 
   useEffect(() => {
-    // if ("serviceWorker" in navigator) {
-    //   navigator.serviceWorker.register("./sw3.js");
-    // }
+    const imagesPromises = images.map((src) => loadSrc(src, "textures"));
+    const soundsPromises = images.map((src) => loadSrc(src, "sounds"));
 
-    const promises = images.map((src) => loadImage(src));
-
-    Promise.all(promises)
+    Promise.all([...imagesPromises, ...soundsPromises])
       .then(() => setState("loaded"))
       .catch(() => setState("error"));
   }, []);
 
-  const loadImage = (src: string): Promise<HTMLImageElement> => {
+  const loadSrc = (src: string, prefix: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.src = "/textures/" + src;
+      img.src = `/${prefix}/` + src;
       img.onload = () => resolve(img);
       img.onerror = (err) => reject(err);
     });
