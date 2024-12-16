@@ -11,20 +11,28 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 
   useEffect(() => {
-    const imagesPromises = images.map((src) => loadSrc(src, "textures"));
-    const soundsPromises = sounds.map((src) => loadSrc(src, "sounds"));
+    const imagesPromises = images.map((src) => loadImages(src));
+    const soundsPromises = sounds.map((src) => loadSounds(src));
 
     Promise.all([...imagesPromises, ...soundsPromises])
       .then(() => setState("loaded"))
       .catch(() => setState("error"));
   }, []);
 
-  const loadSrc = (src: string, prefix: string): Promise<HTMLImageElement> => {
+  const loadImages = (src: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.src = `/${prefix}/` + src;
+      img.src = `/textures/` + src;
       img.onload = () => resolve(img);
       img.onerror = (err) => reject(err);
+    });
+  };
+  const loadSounds = (src: string): Promise<HTMLAudioElement> => {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      audio.src = `/sounds/` + src;
+      audio.onload = () => resolve(audio);
+      audio.onerror = (err) => reject(err);
     });
   };
 
