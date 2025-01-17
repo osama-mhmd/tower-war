@@ -16,7 +16,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 
     Promise.all([...imagesPromises, ...soundsPromises])
       .then(() => setState("loaded"))
-      .catch(() => setState("error"));
+      .catch((e) => {
+        console.log(e);
+        setState("error");
+      });
   }, []);
 
   const loadImages = (src: string): Promise<HTMLImageElement> => {
