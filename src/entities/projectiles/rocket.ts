@@ -1,5 +1,5 @@
 import { TILE_SIZE } from "@/config/constants";
-import { calculateAngle } from "@/helpers";
+// import { calculateAngle } from "@/helpers";
 import { Bullet, RocketConfig } from "@/types/bullets";
 import Enemy from "@/types/enemies";
 
@@ -50,17 +50,20 @@ export default class Rocket implements Bullet {
       return;
     }
 
-    this.now += this.speed;
+    const dx = this.target.x - this.x;
+    const dy = this.target.y - this.y;
+    const distance = Math.hypot(dx, dy);
 
-    const distance = Math.hypot(this.target.x - this.x, this.target.y - this.y);
-
-    if (this.now >= distance) {
+    if (distance <= this.speed) {
       this.isDestroyed = true;
       this.target.health -= this.damage;
-
       return;
     }
-    this.angle = calculateAngle(this, this.target);
+
+    this.x += (dx / distance) * this.speed;
+    this.y += (dy / distance) * this.speed;
+
+    this.angle = Math.atan2(dy, dx);
   }
 
   draw(ctx: CanvasRenderingContext2D) {
