@@ -45,7 +45,7 @@ export default class Rocket implements Bullet {
   }
 
   update() {
-    if (!this.target) {
+    if (!this.target || this.target.health <= 0) {
       this.isDestroyed = true;
       return;
     }
