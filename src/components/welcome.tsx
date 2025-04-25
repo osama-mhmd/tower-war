@@ -10,7 +10,11 @@ export default function Welcome({ mouseClick, setGame }: WelcomeProps) {
   const masterDiv = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="text-2xl overlay start" ref={masterDiv}>
+    <div
+      className="text-2xl overlay start"
+      data-testid="start-menu"
+      ref={masterDiv}
+    >
       <div>
         <p>Start</p>
         <button
@@ -22,6 +26,7 @@ export default function Welcome({ mouseClick, setGame }: WelcomeProps) {
             setTimeout(() => setGame({ state: "running" }), 280);
           }}
           className="text-lg"
+          data-testid="start-menu-button"
         >
           Play
         </button>

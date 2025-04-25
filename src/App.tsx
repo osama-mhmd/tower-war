@@ -34,7 +34,6 @@ function App() {
 
   const { game, getGame, setGame, resetGame } = useGame();
 
-  const [start, setStart] = useState(false);
   // const [play] = useSound("/sounds/metal-hit-woosh.wav", {
   //   volume: 0.5,
   //   onload: () => {
@@ -59,6 +58,9 @@ function App() {
     });
 
     return { grid, waypoints };
+
+    // react-hooks/exhaustive-deps disabled as I put game.trial and game.level to regenerate the grid
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.trial, game.level]);
 
   const entry = useMemo(() => waypoints[0], [waypoints]);
@@ -84,8 +86,8 @@ function App() {
 
     define(ctx);
 
-    setStart(true);
-    setTimeout(() => setStart(false), 1400);
+    // setStart(true);
+    // setTimeout(() => setStart(false), 1400);
   }, []);
 
   useEffect(() => {
@@ -230,6 +232,7 @@ function App() {
           mouseClick();
           setGame({ state: "paused" });
         }}
+        data-testid="logo-button"
       >
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
@@ -311,7 +314,7 @@ function App() {
         </div>
       )}
       {game.state == "paused" && (
-        <div className="overlay text-2xl">
+        <div className="overlay text-2xl" data-testid="pause-menu">
           <p>Paused</p>
           <button
             onClick={() => {
