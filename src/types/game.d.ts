@@ -5,10 +5,9 @@ import { Enemy } from "@/entities/enemies";
 
 export default interface Game {
   enemiesCount: number;
-  over: boolean;
   hp: number;
   currentWave: number;
-  paused: boolean;
+  state: "over" | "paused" | "running" | "start";
   coins: number;
   level: number;
   trial: number;

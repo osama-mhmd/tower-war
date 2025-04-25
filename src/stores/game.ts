@@ -3,10 +3,9 @@ import { create } from "zustand";
 
 const defaultGame: Game = {
   enemiesCount: 0,
-  over: false,
+  state: "start",
   hp: 18,
   currentWave: 1,
-  paused: false,
   coins: 10,
   level: 1,
   trial: 1,

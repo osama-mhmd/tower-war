@@ -34,9 +34,9 @@ export default function gameLoop({
   hoveredCell,
   setCells,
 }: GameLoop) {
-  const { paused } = getGame();
+  const { state } = getGame();
 
-  if (paused) return;
+  if (state !== "running") return;
 
   // update time
   gameTime++;
@@ -73,8 +73,7 @@ export default function gameLoop({
         const isDead = hp - enemy.health <= 0;
 
         setGame({
-          over: isDead,
-          paused: isDead,
+          state: isDead ? "over" : "running",
           hp: isDead ? 0 : hp - enemy.health,
         });
       } else if (enemy.state == "lost") {

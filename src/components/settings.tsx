@@ -10,7 +10,7 @@ export default function Settings({ stater }: { stater(agr0: boolean): void }) {
   function save() {
     play();
     setGame({
-      paused: false,
+      state: "paused",
       settings: { effectsVolume: +effectsVolume.current!.value / 100 },
     });
 
@@ -19,7 +19,7 @@ export default function Settings({ stater }: { stater(agr0: boolean): void }) {
 
   function cancel() {
     play();
-    setGame({ paused: false });
+    setGame({ state: "paused" });
 
     stater(false);
   }

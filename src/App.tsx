@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import {
   CANVAS_HEIGHT,
@@ -18,13 +18,16 @@ import useGame from "./stores/game";
 import { MegaTower, RocketTower } from "@/entities/towers";
 import { Tower } from "@/types/towers";
 import Enemy from "@/types/enemies";
-import Start from "./components/start";
 import useSound from "use-sound";
 import { cn } from "./utils";
 import SettingsTrigger from "./components/settings-trigger";
+import Welcome from "./components/welcome";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
+
+// Pure Components
+const WelcomeScreen = memo(Welcome);
 
 function App() {
   const cells = useCells();
@@ -86,12 +89,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (game.over) {
+    if (game.state == "over") {
       const warDrum = new Audio();
       warDrum.src = "/sounds/drums-of-war.wav";
       warDrum.play();
     }
-  }, [game.over]);
+  }, [game.state]);
 
   useEffect(() => {
     if (!canvas.current) return;
@@ -112,13 +115,13 @@ function App() {
         setCells: cells.set,
       })
     );
-  }, [game.paused]);
+  }, [game.state]);
 
   // keyboard controls effect
   useEffect(() => {
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
-        setGame({ paused: !getGame().paused });
+        setGame({ state: getGame().state == "paused" ? "running" : "paused" });
       }
     });
   }, []);
@@ -225,7 +228,7 @@ function App() {
         className="logo"
         onClick={() => {
           mouseClick();
-          setGame({ paused: true });
+          setGame({ state: "paused" });
         }}
       >
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
@@ -233,7 +236,7 @@ function App() {
       <SettingsTrigger
         onClick={() => {
           mouseClick();
-          setGame({ paused: true });
+          setGame({ state: "paused" });
         }}
       />
       <div className="status">
@@ -250,7 +253,7 @@ function App() {
       <p
         key={game.currentWave}
         style={{
-          animationPlayState: game.paused ? "paused" : "running",
+          animationPlayState: game.state == "running" ? "running" : "paused",
         }}
         className="wave-number"
       >
@@ -293,7 +296,7 @@ function App() {
           );
         })}
       </div>
-      {game.over && (
+      {game.state == "over" && (
         <div className="overlay text-2xl">
           <p>Game over</p>
           <button
@@ -307,13 +310,13 @@ function App() {
           </button>
         </div>
       )}
-      {!game.over && game.paused && (
+      {game.state == "paused" && (
         <div className="overlay text-2xl">
           <p>Paused</p>
           <button
             onClick={() => {
               mouseClick();
-              setGame({ paused: false });
+              setGame({ state: "running" });
             }}
             className="text-lg"
           >
@@ -321,8 +324,11 @@ function App() {
           </button>
         </div>
       )}
+      {game.state == "start" && (
+        <WelcomeScreen setGame={setGame} mouseClick={mouseClick} />
+      )}
 
-      {start && <Start />}
+      {/* {start && <Start />} */}
     </main>
   );
 }
