@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import {
@@ -21,13 +23,15 @@ import Enemy from "@/types/enemies";
 import useSound from "use-sound";
 import { cn } from "./utils";
 import SettingsTrigger from "./components/settings-trigger";
-import Welcome from "./components/welcome";
+import WelcomeMenu from "./components/menus/welcome";
+import PauseMenu from "./components/menus/pause";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
 
 // Pure Components
-const WelcomeScreen = memo(Welcome);
+const WelcomeScreen = memo(WelcomeMenu);
+const PauseScreen = memo(PauseMenu);
 
 function App() {
   const cells = useCells();
@@ -58,9 +62,6 @@ function App() {
     });
 
     return { grid, waypoints };
-
-    // react-hooks/exhaustive-deps disabled as I put game.trial and game.level to regenerate the grid
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.trial, game.level]);
 
   const entry = useMemo(() => waypoints[0], [waypoints]);
@@ -123,7 +124,18 @@ function App() {
   useEffect(() => {
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space") {
-        setGame({ state: getGame().state == "paused" ? "running" : "paused" });
+        const state = getGame().state;
+
+        // if the state is "running" then pause it. if it's "paused" then run it.
+        // else return the state (e.g. over, start)
+        setGame({
+          state:
+            state == "running"
+              ? "paused"
+              : state == "paused"
+              ? "running"
+              : state,
+        });
       }
     });
   }, []);
@@ -237,10 +249,9 @@ function App() {
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </div>
       <SettingsTrigger
-        onClick={() => {
-          mouseClick();
-          setGame({ state: "paused" });
-        }}
+        getGame={getGame}
+        setGame={setGame}
+        mouseClick={mouseClick}
       />
       <div className="status">
         <p>
@@ -314,24 +325,11 @@ function App() {
         </div>
       )}
       {game.state == "paused" && (
-        <div className="overlay text-2xl" data-testid="pause-menu">
-          <p>Paused</p>
-          <button
-            onClick={() => {
-              mouseClick();
-              setGame({ state: "running" });
-            }}
-            className="text-lg"
-          >
-            Continue
-          </button>
-        </div>
+        <PauseScreen setGame={setGame} mouseClick={mouseClick} />
       )}
       {game.state == "start" && (
         <WelcomeScreen setGame={setGame} mouseClick={mouseClick} />
       )}
-
-      {/* {start && <Start />} */}
     </main>
   );
 }

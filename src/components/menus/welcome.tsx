@@ -1,12 +1,12 @@
 import Game from "@/types/game";
 import { useRef } from "react";
 
-interface WelcomeProps {
+interface WelcomeMenuProps {
   mouseClick: () => void;
   setGame(game: Partial<Game>): void;
 }
 
-export default function Welcome({ mouseClick, setGame }: WelcomeProps) {
+export default function WelcomeMenu({ mouseClick, setGame }: WelcomeMenuProps) {
   const masterDiv = useRef<HTMLDivElement>(null);
 
   return (
