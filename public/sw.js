@@ -21,6 +21,25 @@ self.addEventListener("install", (e) => {
   );
 });
 
+self.addEventListener("activate", (e) => {
+  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map((name) => {
+          if (name !== cacheName) {
+            console.log(`[Service Worker] Deleting old cache: ${name}`);
+            return caches.delete(name);
+          }
+        })
+      );
+      self.clients.claim();
+      console.log("[Service Worker] Activate completed");
+    })()
+  );
+});
+
 self.addEventListener("fetch", (e) => {
   e.respondWith(
     (async () => {
@@ -38,7 +57,7 @@ self.addEventListener("fetch", (e) => {
         return response;
       }
       const offlineHTML = await caches.match("/offline.html");
-      console.log(`[Service Worker]: Returing offline.html`);
+      console.log(`[Service Worker]: Returning offline.html`);
       if (offlineHTML) return offlineHTML;
       return new Response();
     })()
