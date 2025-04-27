@@ -46,6 +46,10 @@ function App() {
   );
 
   const { game, getGame, setGame, resetGame } = useGame();
+  const volume = useMemo(
+    () => game.settings.effectsVolume,
+    [game.settings.effectsVolume]
+  );
 
   // const [play] = useSound("/sounds/metal-hit-woosh.wav", {
   //   volume: 0.5,
@@ -53,9 +57,7 @@ function App() {
   //     setStart(true);
   //   },
   // });
-  const [mouseClick2] = useSound("/sounds/mouse-click.wav", {
-    volume: game.settings.effectsVolume,
-  });
+  const [mouseClick2] = useSound("/sounds/mouse-click.wav", { volume });
 
   const canvas = useRef<HTMLCanvasElement>(null);
   const [tower, setTower] = useState("mega");
@@ -144,7 +146,7 @@ function App() {
     );
   }, [game.state]);
 
-  const [success] = useSound("/sounds/success-notification.wav");
+  const [success] = useSound("/sounds/success-notification.wav", { volume });
 
   // TODO: Handle pausing the game while the timeout to trigger sound is still perparing
   useEffect(() => {
