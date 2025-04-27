@@ -35,8 +35,8 @@ export default class RocketTower implements Tower {
   }
 
   fire(target: Entity) {
-    const sound = new Audio();
-    sound.src = "/sounds/rocket-launch.wav";
+    const sound = new Audio("/sounds/rocket-launch.wav");
+    sound.volume = 0.15;
     sound.play();
     const rocket = new Rocket({
       x: this.x,

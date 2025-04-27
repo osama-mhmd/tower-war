@@ -78,17 +78,30 @@ function App() {
 
   const entry = useMemo(() => waypoints[0], [waypoints]);
 
-  const reset = useCallback((inc: "trial" | "level" = "trial") => {
+  const reset = useCallback((incTrial = true, incLevel = false) => {
     const prev = getGame();
 
     resetGame({
-      trial: inc === "trial" ? prev.trial + 1 : 1, // increase trial or reset it
-      level: inc === "level" ? prev.level + 1 : prev.level, // increase level
+      trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
+      level: incLevel ? prev.level + 1 : prev.level, // increase level
       state: "running",
     });
 
     towers.splice(0, towers.length);
     enemies.splice(0, enemies.length);
+  }, []);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      const state = getGame().state;
+
+      // if the state is "running" then pause it. if it's "paused" then run it.
+      // else return the state (e.g. over, start)
+      setGame({
+        state:
+          state == "running" ? "paused" : state == "paused" ? "running" : state,
+      });
+    }
   }, []);
 
   // do once effect
@@ -101,22 +114,11 @@ function App() {
     define(ctx);
 
     // keyboard controls
-    window.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        const state = getGame().state;
+    window.addEventListener("keydown", handleKeyDown);
 
-        // if the state is "running" then pause it. if it's "paused" then run it.
-        // else return the state (e.g. over, start)
-        setGame({
-          state:
-            state == "running"
-              ? "paused"
-              : state == "paused"
-              ? "running"
-              : state,
-        });
-      }
-    });
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   useEffect(() => {

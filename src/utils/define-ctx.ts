@@ -1,6 +1,9 @@
+import { Context } from "@/types/global";
 import { TILE_SIZE } from "../config/constants";
 
 export default function define(ctx: CanvasRenderingContext2D) {
+  if ((ctx as Context).draw) return;
+
   Object.defineProperties(ctx, {
     draw: {
       writable: false,

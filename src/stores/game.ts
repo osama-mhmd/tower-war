@@ -11,7 +11,7 @@ const defaultGame: Game = {
   trial: 1,
   effects: [],
   settings: {
-    effectsVolume: 0.5,
+    effectsVolume: 0.3,
   },
 };
 
