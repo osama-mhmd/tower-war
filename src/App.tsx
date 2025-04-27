@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import {
   CANVAS_HEIGHT,
@@ -12,7 +12,7 @@ import {
 import generateGrid from "./utils/generate-grid";
 import { Coins, Heart, Skull } from "lucide-react";
 import { Context, Point } from "./types/global";
-import OffscreenCanvas from "./components/offscreen-canvas";
+import OffscreenCtx from "./components/offscreen-canvas";
 import useCells from "./stores/cells";
 import define from "./utils/define-ctx";
 import gameLoop from "@/core/gameloop";
@@ -25,6 +25,7 @@ import { cn } from "./utils";
 import SettingsTrigger from "./components/settings-trigger";
 import WelcomeMenu from "./components/menus/welcome";
 import PauseMenu from "./components/menus/pause";
+import Clickable from "./components/clickable";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
@@ -32,9 +33,17 @@ const enemies: Enemy[] = [];
 // Pure Components
 const WelcomeScreen = memo(WelcomeMenu);
 const PauseScreen = memo(PauseMenu);
+const OffscreenCanvas = memo(OffscreenCtx);
 
 function App() {
-  const cells = useCells();
+  const getCells = useCells((store) => store.get);
+  const setCells = useCells((store) => store.set);
+  const resetCells = useCells((store) => store.reset);
+
+  const cells = useMemo(
+    () => ({ get: getCells, set: setCells, reset: resetCells }),
+    [getCells, setCells, resetCells]
+  );
 
   const { game, getGame, setGame, resetGame } = useGame();
 
@@ -44,8 +53,9 @@ function App() {
   //     setStart(true);
   //   },
   // });
-  const [mouseClick] = useSound("/sounds/mouse-click-2.wav", { volume: 0.4 });
-  const [mouseClick2] = useSound("/sounds/mouse-click.wav", { volume: 0.4 });
+  const [mouseClick2] = useSound("/sounds/mouse-click.wav", {
+    volume: game.settings.effectsVolume,
+  });
 
   const canvas = useRef<HTMLCanvasElement>(null);
   const [tower, setTower] = useState("mega");
@@ -66,17 +76,18 @@ function App() {
 
   const entry = useMemo(() => waypoints[0], [waypoints]);
 
-  function reset(incTrial: boolean = true, incLevel = false) {
+  const reset = useCallback((inc: "trial" | "level" = "trial") => {
     const prev = getGame();
 
     resetGame({
-      trial: incTrial ? prev.trial + 1 : 1, // increase trial or reset it
-      level: incLevel ? prev.level + 1 : prev.level, // increase level
+      trial: inc === "trial" ? prev.trial + 1 : 1, // increase trial or reset it
+      level: inc === "level" ? prev.level + 1 : prev.level, // increase level
+      state: "running",
     });
 
     towers.splice(0, towers.length);
     enemies.splice(0, enemies.length);
-  }
+  }, []);
 
   // do once effect
   useEffect(() => {
@@ -87,8 +98,23 @@ function App() {
 
     define(ctx);
 
-    // setStart(true);
-    // setTimeout(() => setStart(false), 1400);
+    // keyboard controls
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        const state = getGame().state;
+
+        // if the state is "running" then pause it. if it's "paused" then run it.
+        // else return the state (e.g. over, start)
+        setGame({
+          state:
+            state == "running"
+              ? "paused"
+              : state == "paused"
+              ? "running"
+              : state,
+        });
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -97,9 +123,7 @@ function App() {
       warDrum.src = "/sounds/drums-of-war.wav";
       warDrum.play();
     }
-  }, [game.state]);
 
-  useEffect(() => {
     if (!canvas.current) return;
 
     const ctx = canvas.current.getContext("2d") as Context;
@@ -119,26 +143,6 @@ function App() {
       })
     );
   }, [game.state]);
-
-  // keyboard controls effect
-  useEffect(() => {
-    window.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        const state = getGame().state;
-
-        // if the state is "running" then pause it. if it's "paused" then run it.
-        // else return the state (e.g. over, start)
-        setGame({
-          state:
-            state == "running"
-              ? "paused"
-              : state == "paused"
-              ? "running"
-              : state,
-        });
-      }
-    });
-  }, []);
 
   const [success] = useSound("/sounds/success-notification.wav");
 
@@ -238,21 +242,17 @@ function App() {
 
   return (
     <main>
-      <div
+      <Clickable
+        as="div"
         className="logo"
         onClick={() => {
-          mouseClick();
           setGame({ state: "paused" });
         }}
         data-testid="logo-button"
       >
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
-      </div>
-      <SettingsTrigger
-        getGame={getGame}
-        setGame={setGame}
-        mouseClick={mouseClick}
-      />
+      </Clickable>
+      <SettingsTrigger />
       <div className="status">
         <p>
           {game.hp} <Heart fill="red" stroke="#d30" />
@@ -313,23 +313,13 @@ function App() {
       {game.state == "over" && (
         <div className="overlay text-2xl">
           <p>Game over</p>
-          <button
-            onClick={() => {
-              mouseClick();
-              reset();
-            }}
-            className="text-lg"
-          >
+          <Clickable onClick={() => reset()} className="text-lg">
             Retry
-          </button>
+          </Clickable>
         </div>
       )}
-      {game.state == "paused" && (
-        <PauseScreen setGame={setGame} mouseClick={mouseClick} />
-      )}
-      {game.state == "start" && (
-        <WelcomeScreen setGame={setGame} mouseClick={mouseClick} />
-      )}
+      {game.state == "paused" && <PauseScreen />}
+      {game.state == "start" && <WelcomeScreen />}
     </main>
   );
 }

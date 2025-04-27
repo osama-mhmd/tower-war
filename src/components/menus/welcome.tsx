@@ -1,13 +1,10 @@
-import Game from "@/types/game";
 import { useRef } from "react";
+import Clickable from "../clickable";
+import useGame from "@/stores/game";
 
-interface WelcomeMenuProps {
-  mouseClick: () => void;
-  setGame(game: Partial<Game>): void;
-}
-
-export default function WelcomeMenu({ mouseClick, setGame }: WelcomeMenuProps) {
+export default function WelcomeMenu() {
   const masterDiv = useRef<HTMLDivElement>(null);
+  const setGame = useGame((state) => state.setGame);
 
   return (
     <div
@@ -17,9 +14,8 @@ export default function WelcomeMenu({ mouseClick, setGame }: WelcomeMenuProps) {
     >
       <div>
         <p>Start</p>
-        <button
+        <Clickable
           onClick={() => {
-            mouseClick();
             if (masterDiv.current) {
               masterDiv.current.classList.add("leaving");
             }
@@ -29,7 +25,7 @@ export default function WelcomeMenu({ mouseClick, setGame }: WelcomeMenuProps) {
           data-testid="start-menu-button"
         >
           Play
-        </button>
+        </Clickable>
       </div>
     </div>
   );

@@ -1,23 +1,20 @@
-import Game from "@/types/game";
+import useGame from "@/stores/game";
+import Clickable from "../clickable";
 
-interface PauseMenuProps {
-  mouseClick: () => void;
-  setGame(game: Partial<Game>): void;
-}
+export default function PauseMenu() {
+  const setGame = useGame((state) => state.setGame);
 
-export default function PauseMenu({ mouseClick, setGame }: PauseMenuProps) {
   return (
     <div className="overlay text-2xl" data-testid="pause-menu">
       <p>Paused</p>
-      <button
+      <Clickable
         onClick={() => {
-          mouseClick();
           setGame({ state: "running" });
         }}
         className="text-lg"
       >
         Continue
-      </button>
+      </Clickable>
     </div>
   );
 }

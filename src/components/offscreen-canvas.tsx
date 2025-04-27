@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect, useRef } from "react";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../config/constants";
 import drawGrid from "../utils/draw-grid";
@@ -8,9 +10,12 @@ import useGame from "@/stores/game";
 let currentEffectIndex = 0;
 
 export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
-  const store = useCells();
+  const get = useCells((state) => state.get);
+  const set = useCells((state) => state.set);
 
-  const effects = useGame().game.effects;
+  const store = { get, set };
+
+  const effects = useGame((state) => state.game.effects);
 
   const canvas = useRef<HTMLCanvasElement>(null);
 

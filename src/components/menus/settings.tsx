@@ -1,7 +1,7 @@
 import useGame from "@/stores/game";
 import Game from "@/types/game";
 import { useRef } from "react";
-import useSound from "use-sound";
+import Clickable from "../clickable";
 
 export default function Settings({
   stater,
@@ -11,12 +11,10 @@ export default function Settings({
   oldState: Game["state"];
 }) {
   const effectsVolume = useRef<HTMLInputElement>(null);
-  const { getGame, setGame } = useGame();
-  const [play] = useSound("/sounds/mouse-click-2.wav", { volume: 0.4 });
+  const getGame = useGame((state) => state.getGame);
+  const setGame = useGame((state) => state.setGame);
 
   function save() {
-    play();
-
     setGame({
       state: oldState,
       settings: { effectsVolume: +effectsVolume.current!.value / 100 },
@@ -26,8 +24,6 @@ export default function Settings({
   }
 
   function cancel() {
-    play();
-
     setGame({ state: oldState });
 
     stater(false);
@@ -53,8 +49,8 @@ export default function Settings({
         </div>
         {/* Footer */}
         <div>
-          <button onClick={cancel}>Cancel</button>
-          <button onClick={save}>Save</button>
+          <Clickable onClick={cancel}>Cancel</Clickable>
+          <Clickable onClick={save}>Save</Clickable>
         </div>
       </div>
     </div>

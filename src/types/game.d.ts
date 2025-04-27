@@ -10,7 +10,7 @@ export default interface Game {
   trial: number;
   currentWave: number;
   effects: Effect[];
-  settings?: {
+  settings: {
     effectsVolume: number;
   };
 }
