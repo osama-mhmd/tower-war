@@ -26,6 +26,7 @@ import SettingsTrigger from "./components/settings-trigger";
 import WelcomeMenu from "./components/menus/welcome";
 import PauseMenu from "./components/menus/pause";
 import Clickable from "./components/clickable";
+import DevMode from "./components/dev-mode";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
@@ -155,6 +156,14 @@ function App() {
     setTimeout(() => success(), 1500);
   }, [game.currentWave]);
 
+  useEffect(() => {
+    if (game.enemiesCount >= 200) {
+      setGame({ state: "levelup" });
+      success();
+      setTimeout(() => reset(false, true), 1500);
+    }
+  }, [game.enemiesCount]);
+
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const cv = canvas.current;
     if (!cv) return;
@@ -263,6 +272,15 @@ function App() {
         </p>
         <p>
           {game.enemiesCount} <Skull fill="#000" stroke="#FF4500" />
+          <DevMode>
+            <input
+              onClick={(e) =>
+                setGame({ enemiesCount: +(e.target as HTMLInputElement).value })
+              }
+              type="range"
+              max={200}
+            />
+          </DevMode>
         </p>
         <p>
           {game.coins} <Coins fill="#000" stroke="#45FF00" />
@@ -273,10 +291,15 @@ function App() {
         style={{
           animationPlayState: game.state == "running" ? "running" : "paused",
         }}
-        className="wave-number"
+        className="flash-text wave-number"
       >
         <span>WAVE</span> {game.currentWave}
       </p>
+      {game.state == "levelup" && (
+        <p className="flash-text levelup">
+          <span>LEVEL UP</span>
+        </p>
+      )}
       <section>
         <OffscreenCanvas grid={grid} />
         <canvas

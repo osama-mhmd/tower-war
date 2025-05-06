@@ -1,3 +1,4 @@
+import textures from "@/config/boimes-textures";
 import { TILE_SIZE, ROWS_COUNT, COLUMNS_COUNT } from "../config/constants";
 // import { Point } from "../types/global";
 
@@ -20,60 +21,10 @@ function getPathTexture(grid: number[][], row: number, col: number) {
   return "vertical";
 }
 
-const textures = {
-  horizontal: [
-    "towerDefense_tile047",
-    "towerDefense_tile047",
-    "towerDefense_tile001",
-    "towerDefense_tile001",
-  ],
-  vertical: [
-    "towerDefense_tile025",
-    "towerDefense_tile023",
-    "towerDefense_tile025",
-    "towerDefense_tile023",
-  ],
-  "corner-top-right": [
-    "towerDefense_tile025",
-    "towerDefense_tile046",
-    "towerDefense_tile026",
-    "towerDefense_tile001",
-  ],
-  "corner-top-left": [
-    "towerDefense_tile048",
-    "towerDefense_tile023",
-    "towerDefense_tile001",
-    "towerDefense_tile027",
-  ],
-  "corner-bottom-right": [
-    "towerDefense_tile003",
-    "towerDefense_tile047",
-    "towerDefense_tile025",
-    "towerDefense_tile299",
-  ],
-  "corner-bottom-left": [
-    "towerDefense_tile047",
-    "towerDefense_tile004",
-    "towerDefense_tile002",
-    "towerDefense_tile023",
-  ],
-  "t-top-rl": [
-    "towerDefense_tile053",
-    "towerDefense_tile051",
-    "towerDefense_tile001",
-    "towerDefense_tile001",
-  ],
-  "t-bottom-rl": [
-    "towerDefense_tile047",
-    "towerDefense_tile047",
-    "towerDefense_tile002",
-    "towerDefense_tile299",
-  ],
-};
-
 export default function drawGrid(
   ctx: CanvasRenderingContext2D,
-  grid: number[][]
+  grid: number[][],
+  boime: 0 | 1 | 2 = 0
   // hoveredCell: Point | null // TODO: hoveredCell
 ) {
   for (let row = 0; row < ROWS_COUNT; row++) {
@@ -85,7 +36,7 @@ export default function drawGrid(
 
         for (let i = 0; i < 4; i++) {
           const image = new Image();
-          image.src = `/textures/${textures[textureKey][i]}.png`;
+          image.src = `/textures/${textures[boime][textureKey][i]}.png`;
 
           let offsetX = 0;
           let offsetY = 0;
@@ -111,7 +62,7 @@ export default function drawGrid(
         }
       } else {
         const grassTexture = new Image();
-        grassTexture.src = "/textures/towerDefense_tile024.png";
+        grassTexture.src = `/textures/${textures[boime].grass}.png`;
 
         grassTexture.onload = () => {
           ctx.drawImage(

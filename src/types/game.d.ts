@@ -4,7 +4,7 @@ export default interface Game {
   enemiesCount: number;
   hp: number;
   currentWave: number;
-  state: "over" | "paused" | "running" | "start" | "settings";
+  state: "over" | "paused" | "running" | "start" | "settings" | "levelup";
   coins: number;
   level: number;
   trial: number;

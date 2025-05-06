@@ -76,23 +76,29 @@ section {
   top: 50%;
   translate: -50% -50%;
 }
+.levelup {
+  color: yellow;
+  text-shadow: 0.05em 0.05em rgb(0, 101, 0);
+}
 .wave-number {
+  color: black;
+  text-shadow: 0.05em 0.05em red;
+  animation-delay: 1.5s;
+}
+.flash-text {
   position: absolute;
   padding: 0.25rem 1.5rem;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
   animation: flash 2s forwards ease-in-out;
-  animation-delay: 1.5s;
   font-size: 5rem;
-  color: black;
-  text-shadow: 0.05em 0.05em red;
   margin: 0;
   border-radius: 0 0 0.5rem 0.5rem;
   opacity: 0;
   pointer-events: none;
 }
-.wave-number span {
+.flash-text span {
   letter-spacing: 0.75ch;
   margin-inline-end: 0.5rem;
 }

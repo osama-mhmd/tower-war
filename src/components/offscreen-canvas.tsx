@@ -16,6 +16,7 @@ export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
   const store = { get, set };
 
   const effects = useGame((state) => state.game.effects);
+  const level = useGame((state) => state.game.level);
 
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -23,7 +24,7 @@ export default function OffscreenCanvas({ grid }: { grid: number[][] }) {
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
 
-    drawGrid(ctx, grid);
+    drawGrid(ctx, grid, level - 1 > 2 ? 0 : ((level - 1) as 0 | 1 | 2));
 
     // spawn random rocks
     throwRandomObjs(ctx, store, "towerDefense_tile135", [1, 0]);
