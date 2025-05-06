@@ -10,7 +10,6 @@ import {
   TILE_SIZE,
 } from "./config/constants";
 import generateGrid from "./utils/generate-grid";
-import { Coins, Heart, Skull } from "lucide-react";
 import { Context, Point } from "./types/global";
 import OffscreenCtx from "./components/offscreen-canvas";
 import useCells from "./stores/cells";
@@ -26,7 +25,7 @@ import SettingsTrigger from "./components/settings-trigger";
 import WelcomeMenu from "./components/menus/welcome";
 import PauseMenu from "./components/menus/pause";
 import Clickable from "./components/clickable";
-import DevMode from "./components/dev-mode";
+import GameStatus from "./components/game-status";
 
 const towers: Tower[] = [];
 const enemies: Enemy[] = [];
@@ -266,26 +265,7 @@ function App() {
         <img src="/tower-defense-logo.png" width={80} alt="Tower Defense" />
       </Clickable>
       <SettingsTrigger />
-      <div className="status">
-        <p>
-          {game.hp} <Heart fill="red" stroke="#d30" />
-        </p>
-        <p>
-          {game.enemiesCount} <Skull fill="#000" stroke="#FF4500" />
-          <DevMode>
-            <input
-              onClick={(e) =>
-                setGame({ enemiesCount: +(e.target as HTMLInputElement).value })
-              }
-              type="range"
-              max={200}
-            />
-          </DevMode>
-        </p>
-        <p>
-          {game.coins} <Coins fill="#000" stroke="#45FF00" />
-        </p>
-      </div>
+      <GameStatus game={game} setGame={setGame} />
       <p
         key={game.currentWave}
         style={{
